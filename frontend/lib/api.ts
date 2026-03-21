@@ -1,0 +1,127 @@
+export interface Message {
+  id: number;
+  type: 'free' | 'paid';
+  sender_name: string | null;
+  user_message: string;
+  alice_response: string;
+  alice_image: string | null;
+  amount: number | null;
+  created_at: string;
+  user_id: number | null;
+  device: string | null;
+  os: string | null;
+  city: string | null;
+  country: string | null;
+  votes_up: number;
+  votes_down: number;
+}
+
+export interface MessagesResponse {
+  messages: Message[];
+  next_cursor: number | null;
+  has_more: boolean;
+}
+
+export interface StatsResponse {
+  total_messages: number;
+  online_count: number;
+}
+
+export interface AskResponse {
+  id: number;
+  status: 'streaming';
+}
+
+export interface PaymentResponse {
+  payment_url: string;
+  payment_id: string;
+}
+
+const API_BASE = '/api';
+
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.text().catch(() => 'Unknown error');
+    throw new Error(`API error ${res.status}: ${error}`);
+  }
+
+  return res.json();
+}
+
+export async function fetchMessages(
+  cursor?: number | null,
+  limit: number = 20
+): Promise<MessagesResponse> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cursor != null) {
+    params.set('cursor', String(cursor));
+  }
+  return apiFetch<MessagesResponse>(`/messages?${params}`);
+}
+
+export async function fetchStats(): Promise<StatsResponse> {
+  return apiFetch<StatsResponse>('/stats');
+}
+
+export async function askAlice(): Promise<AskResponse> {
+  return apiFetch<AskResponse>('/ask', {
+    method: 'POST',
+    body: JSON.stringify({ user_message: 'Алиса покажи пизду' }),
+  });
+}
+
+export async function askCustom(
+  message: string,
+  senderName?: string
+): Promise<AskResponse> {
+  return apiFetch<AskResponse>('/ask-custom', {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      sender_name: senderName || null,
+    }),
+  });
+}
+
+export async function createPayment(message: string): Promise<PaymentResponse> {
+  return apiFetch<PaymentResponse>('/payment/create', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function getSSEUrl(): string {
+  return `${API_BASE}/messages/stream`;
+}
+
+export async function voteMessage(
+  messageId: number,
+  vote: 1 | -1
+): Promise<{ ok: boolean; up: number; down: number }> {
+  return apiFetch(`/vote/${messageId}`, {
+    method: 'POST',
+    body: JSON.stringify({ vote }),
+  });
+}
+
+export async function updateName(
+  messageId: number,
+  senderName: string
+): Promise<{ ok: boolean }> {
+  return apiFetch(`/name/${messageId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ sender_name: senderName }),
+  });
+}
+
+export function getMessageShareUrl(messageId: number): string {
+  return `${window.location.origin}/#msg-${messageId}`;
+}

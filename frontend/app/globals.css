@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0f0f1a;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0f1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a3a5a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7B68EE;
+}
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typewriter-cursor::after {
+  content: '\2588';
+  animation: blink 0.7s step-end infinite;
+  color: #7B68EE;
+  margin-left: 1px;
+}
+
+/* VIP shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.vip-badge {
+  background: linear-gradient(90deg, #ffd700, #ffed4a, #ffd700);
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow button */
+.btn-glow {
+  background: linear-gradient(135deg, #7B68EE 0%, #9B59B6 100%);
+  box-shadow: 0 0 20px rgba(123, 104, 238, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 40px rgba(123, 104, 238, 0.7);
+  transform: translateY(-1px);
+}
+
+.btn-glow:active {
+  transform: translateY(0);
+  box-shadow: 0 0 15px rgba(123, 104, 238, 0.3);
+}
+
+/* Own message gold border */
+.own-card {
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.08);
+}
+
+/* VIP gold border */
+.vip-card {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+}
+
+/* Sticky bottom panel */
+.bottom-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 15, 26, 0.9);
+  border-top: 1px solid rgba(123, 104, 238, 0.2);
+}
+
+/* Share button */
+.share-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message-card:hover .share-btn {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .share-btn {
+    opacity: 0.6;
+  }
+}
+
+/* Donate button */
+.donate-btn {
+  background: linear-gradient(135deg, #ffd700 0%, #f0c000 50%, #ffd700 100%);
+  background-size: 200% auto;
+  color: #1a1a00;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+}
+
+.donate-btn:hover {
+  background-position: right center;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Safe area for notch devices */
+.bottom-panel {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* Prevent text selection on buttons */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better touch targets */
+@media (max-width: 640px) {
+  .message-card {
+    padding: 0.875rem;
+  }
+}
