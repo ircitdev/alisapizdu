@@ -43,7 +43,8 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
   const [newMessageIds, setNewMessageIds] = useState<Set<number>>(new Set());
   const [hasAsked, setHasAsked] = useState(false);
   const [fakeOnline, setFakeOnline] = useState(0);
-  const [filterMode, setFilterMode] = useState<'none' | 'top' | 'new' | 'vip'>('none');
+  const [filterMode, setFilterMode] = useState<'none' | 'top' | 'new' | 'vip' | 'images'>('none');
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | undefined>(undefined);
 
   // Read invite code from URL params (client-side only)
@@ -232,11 +233,41 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
               {filterMode === 'top' && 'Топ по голосам'}
               {filterMode === 'new' && 'Сначала новые'}
               {filterMode === 'vip' && 'Только VIP'}
+              {filterMode === 'images' && 'Галерея'}
             </div>
           )}
 
+          {/* Images grid */}
+          {filterMode === 'images' && (
+            <>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
+                {messages.filter(m => m.has_image || m.alice_image).map(m => (
+                  <img
+                    key={m.id}
+                    src={m.alice_image ? `data:image/jpeg;base64,${m.alice_image}` : `/api/image/${m.id}`}
+                    alt=""
+                    className="w-full aspect-square object-cover rounded-lg border border-white/10
+                               cursor-pointer hover:opacity-80 transition-opacity"
+                    loading="lazy"
+                    onClick={() => setLightboxImg(
+                      m.alice_image ? `data:image/jpeg;base64,${m.alice_image}` : `/api/image/${m.id}`
+                    )}
+                  />
+                ))}
+              </div>
+              {lightboxImg && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
+                  onClick={() => setLightboxImg(null)}
+                >
+                  <img src={lightboxImg} alt="" className="max-w-[90vw] max-h-[85vh] rounded-xl object-contain animate-fade-in" />
+                </div>
+              )}
+            </>
+          )}
+
           {/* Messages */}
-          {(() => {
+          {filterMode !== 'images' && (() => {
             let sorted = messages;
             if (filterMode === 'top') sorted = [...messages].sort((a, b) => (b.votes_up - b.votes_down) - (a.votes_up - a.votes_down));
             else if (filterMode === 'new') sorted = [...messages].sort((a, b) => b.id - a.id);

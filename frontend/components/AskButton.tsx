@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { askAlice, useInvite } from '@/lib/api';
 import { reachGoal } from '@/lib/metrika';
 
-type FilterMode = 'none' | 'top' | 'new' | 'vip';
+type FilterMode = 'none' | 'top' | 'new' | 'vip' | 'images';
 
 interface AskButtonProps {
   onCustomClick: () => void;
@@ -149,6 +149,7 @@ export default function AskButton({ onCustomClick, onInviteClick, onFilterChange
                   { mode: 'top' as FilterMode, icon: '🔝', label: 'Топ' },
                   { mode: 'new' as FilterMode, icon: '🆕', label: 'Новые' },
                   { mode: 'vip' as FilterMode, icon: '👑', label: 'VIP' },
+                  { mode: 'images' as FilterMode, icon: '🖼', label: 'Картинки' },
                 ]).map(({ mode, icon, label }) => (
                   <button
                     key={mode}
