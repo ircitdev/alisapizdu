@@ -6,8 +6,8 @@ const CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 // Map<ipHash, { timestamp, userId }>
 const rateLimitMap = new Map();
 
-// Counter for unique user IDs
-let userIdCounter = 1000;
+// Counter for unique user IDs (7 digits)
+let userIdCounter = 1000000;
 
 function getRealIP(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()

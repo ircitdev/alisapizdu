@@ -3,10 +3,11 @@
 interface HeaderProps {
   onlineCount: number;
   totalMessages: number;
+  vipCount: number;
   onDonateClick: () => void;
 }
 
-export default function Header({ onlineCount, totalMessages, onDonateClick }: HeaderProps) {
+export default function Header({ onlineCount, totalMessages, vipCount, onDonateClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-bg-primary/90 backdrop-blur-md border-b border-alice-purple/20">
       <div className="max-w-chat mx-auto px-4 py-3">
@@ -38,7 +39,7 @@ export default function Header({ onlineCount, totalMessages, onDonateClick }: He
               {/* VIP count */}
               <div className="flex items-center gap-1" title="VIP сообщений">
                 <span>👑</span>
-                <span className="text-vip-gold font-semibold">0</span>
+                <span className="text-vip-gold font-semibold">{vipCount}</span>
               </div>
             </div>
 

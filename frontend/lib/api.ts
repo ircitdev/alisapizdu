@@ -5,6 +5,7 @@ export interface Message {
   user_message: string;
   alice_response: string;
   alice_image: string | null;
+  has_image: number;
   amount: number | null;
   created_at: string;
   user_id: number | null;
@@ -12,6 +13,7 @@ export interface Message {
   os: string | null;
   city: string | null;
   country: string | null;
+  reply_to: number | null;
   votes_up: number;
   votes_down: number;
 }
@@ -25,6 +27,7 @@ export interface MessagesResponse {
 export interface StatsResponse {
   total_messages: number;
   online_count: number;
+  vip_count: number;
 }
 
 export interface AskResponse {
@@ -72,9 +75,10 @@ export async function fetchStats(): Promise<StatsResponse> {
 }
 
 export async function askAlice(): Promise<AskResponse> {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
   return apiFetch<AskResponse>('/ask', {
     method: 'POST',
-    body: JSON.stringify({ user_message: 'Алиса покажи пизду' }),
+    body: JSON.stringify({ timezone }),
   });
 }
 

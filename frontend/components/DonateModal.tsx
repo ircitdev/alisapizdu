@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { reachGoal } from '@/lib/metrika';
+import TeamModal from './TeamModal';
 
 interface DonateModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export default function DonateModal({ isOpen, onClose }: DonateModalProps) {
     },
     [onClose]
   );
+
+  const [teamOpen, setTeamOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) reachGoal('donate_open');
@@ -78,6 +81,15 @@ export default function DonateModal({ isOpen, onClose }: DonateModalProps) {
             Выделить грант
           </a>
 
+          <button
+            onClick={() => setTeamOpen(true)}
+            className="w-full py-2.5 rounded-xl font-medium text-sm text-center
+                       border border-white/10 text-white/40 hover:text-white/60 hover:border-white/20
+                       transition-all duration-300"
+          >
+            Команда исследователей
+          </button>
+
           <div className="text-center">
             <p className="text-white/25 text-[11px] mt-3 leading-relaxed">
               Распространение ссылки на платформу среди коллег также является
@@ -86,6 +98,8 @@ export default function DonateModal({ isOpen, onClose }: DonateModalProps) {
           </div>
         </div>
       </div>
+
+      <TeamModal isOpen={teamOpen} onClose={() => setTeamOpen(false)} />
     </div>
   );
 }

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(firecrawl scrape:*)",
+      "Bash(mkdir -p .firecrawl)",
+      "Bash(npx firecrawl:*)",
+      "WebFetch(domain:istheshipstillstuck.com)",
+      "WebFetch(domain:pointerpointer.com)",
+      "WebFetch(domain:theuselessweb.com)",
+      "WebFetch(domain:pudding.cool)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(node -e \":*)",
+      "Bash(rm -f data/alisapizdu.db)"
+    ]
+  }
+}

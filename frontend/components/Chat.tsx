@@ -11,8 +11,8 @@ import DonateModal from './DonateModal';
 import LegalModal from './LegalModal';
 import { reachGoal } from '@/lib/metrika';
 
-const APP_VERSION = '1.0.0';
-const BUILD_ID = '2026.03.21';
+const APP_VERSION = '1.1.0';
+const BUILD_ID = '2026.03.22';
 
 export default function Chat() {
   const {
@@ -27,6 +27,7 @@ export default function Chat() {
     addMessage,
     appendToken,
     completeMessage,
+    vipCount,
     updateVotes,
     updateMessageName,
     updateOnlineCount,
@@ -150,7 +151,7 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-[100dvh]">
-      <Header onlineCount={Math.max(fakeOnline, onlineCount)} totalMessages={totalMessages} onDonateClick={() => setDonateOpen(true)} />
+      <Header onlineCount={Math.max(fakeOnline, onlineCount)} totalMessages={totalMessages} vipCount={vipCount} onDonateClick={() => setDonateOpen(true)} />
 
       {/* Chat feed */}
       <div
@@ -197,10 +198,14 @@ export default function Chat() {
           {/* Messages */}
           {messages.map((msg) => {
             const streaming = streamingState[msg.id];
+            const replyMsg = msg.reply_to
+              ? messages.find((m) => m.id === msg.reply_to) || null
+              : null;
             return (
               <MessageCard
                 key={msg.id}
                 message={msg}
+                replyMessage={replyMsg}
                 streamingTokens={streaming?.tokens}
                 isStreaming={!!streaming && !streaming.isComplete}
                 isNew={newMessageIds.has(msg.id)}
@@ -231,31 +236,16 @@ export default function Chat() {
         type={legalType || 'privacy'}
       />
 
-      <footer className="py-3 px-4">
-        <div className="max-w-chat mx-auto flex flex-col items-center gap-1.5">
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            <a
-              href="https://t.me/uspeshnyy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/15 hover:text-white/30 text-[10px] transition-colors"
-            >
-              Uspeshnyy dev
-            </a>
-            <span className="text-white/8 text-[9px] font-mono">v{APP_VERSION} ({BUILD_ID})</span>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap justify-center">
-            <button onClick={() => setLegalType('privacy')} className="text-white/10 hover:text-white/25 text-[10px] transition-colors">
-              Политика
-            </button>
-            <button onClick={() => setLegalType('terms')} className="text-white/10 hover:text-white/25 text-[10px] transition-colors">
-              Соглашение
-            </button>
-            <button onClick={() => setLegalType('cookies')} className="text-white/10 hover:text-white/25 text-[10px] transition-colors">
-              Cookies
-            </button>
-            <span className="text-white/15 text-[10px] border border-white/10 rounded px-1 py-0.5 font-bold">18+</span>
-          </div>
+      <footer className="py-2 px-4">
+        <div className="max-w-chat mx-auto flex items-center justify-center gap-1.5 flex-wrap text-[9px] sm:text-[10px]">
+          <a href="https://t.me/uspeshnyy" target="_blank" rel="noopener noreferrer" className="text-white/15 hover:text-white/30 transition-colors">Uspeshnyy dev</a>
+          <span className="text-white/8">·</span>
+          <span className="text-white/8 font-mono">v{APP_VERSION}</span>
+          <span className="text-white/8">·</span>
+          <button onClick={() => setLegalType('privacy')} className="text-white/10 hover:text-white/25 transition-colors">Политика</button>
+          <button onClick={() => setLegalType('terms')} className="text-white/10 hover:text-white/25 transition-colors">Соглашение</button>
+          <button onClick={() => setLegalType('cookies')} className="text-white/10 hover:text-white/25 transition-colors">Cookies</button>
+          <span className="text-white/15 border border-white/10 rounded px-1 py-0.5 font-bold leading-none">18+</span>
         </div>
       </footer>
     </div>

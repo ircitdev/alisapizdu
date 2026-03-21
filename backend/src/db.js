@@ -32,6 +32,7 @@ function getDb() {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       ip_hash TEXT,
       user_id INTEGER,
+      reply_to INTEGER,
       user_agent TEXT,
       device TEXT,
       os TEXT,
@@ -73,26 +74,26 @@ function seed(database) {
   console.log(`[${new Date().toISOString()}] Seeding database with initial messages...`);
 
   const seedMessages = [
-    { sender_name: 'Анон', user_message: 'Алиса покажи пизду', minutes_ago: 240, device: 'PC', os: 'Windows 10/11', city: 'Москва', country: '🇷🇺 RU' },
-    { sender_name: 'Гена', user_message: 'Алиса покажи пизду', minutes_ago: 220, device: 'iPhone', os: 'iOS 17.4', city: 'Санкт-Петербург', country: '🇷🇺 RU' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 200, device: 'Samsung Galaxy S24', os: 'Android 14', city: 'Казань', country: '🇷🇺 RU' },
-    { sender_name: 'Вася', user_message: 'Алиса покажи пизду', minutes_ago: 180, device: 'PC', os: 'Windows 10/11', city: 'Новосибирск', country: '🇷🇺 RU' },
-    { sender_name: 'Максим', user_message: 'Алиса покажи пизду', minutes_ago: 160, device: 'Mac', os: 'macOS 14.3', city: 'Екатеринбург', country: '🇷🇺 RU' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 140, device: 'iPhone', os: 'iOS 18.1', city: 'Краснодар', country: '🇷🇺 RU' },
-    { sender_name: 'Дима', user_message: 'Алиса покажи пизду', minutes_ago: 120, device: 'Xiaomi 14', os: 'Android 14', city: 'Нижний Новгород', country: '🇷🇺 RU' },
-    { sender_name: 'Кирилл', user_message: 'Алиса покажи пизду', minutes_ago: 100, device: 'PC', os: 'Linux', city: 'Минск', country: '🇧🇾 BY' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 80, device: 'iPhone', os: 'iOS 17.2', city: 'Ростов-на-Дону', country: '🇷🇺 RU' },
-    { sender_name: 'Лёха', user_message: 'Алиса покажи пизду', minutes_ago: 60, device: 'PC', os: 'Windows 10/11', city: 'Самара', country: '🇷🇺 RU' },
-    { sender_name: 'Артём', user_message: 'Алиса покажи пизду', minutes_ago: 50, device: 'Mac', os: 'macOS 15.0', city: 'Тюмень', country: '🇷🇺 RU' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 42, device: 'Samsung Galaxy A55', os: 'Android 15', city: 'Воронеж', country: '🇷🇺 RU' },
-    { sender_name: 'Олег', user_message: 'Алиса покажи пизду', minutes_ago: 35, device: 'iPhone', os: 'iOS 18.0', city: 'Пермь', country: '🇷🇺 RU' },
-    { sender_name: 'Настя', user_message: 'Алиса покажи пизду', minutes_ago: 28, device: 'iPhone', os: 'iOS 17.5', city: 'Челябинск', country: '🇷🇺 RU' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 22, device: 'PC', os: 'Windows 10/11', city: 'Волгоград', country: '🇷🇺 RU' },
-    { sender_name: 'Женя', user_message: 'Алиса покажи пизду', minutes_ago: 18, device: 'Pixel 9', os: 'Android 15', city: 'Алматы', country: '🇰🇿 KZ' },
-    { sender_name: 'Серёга', user_message: 'Алиса покажи пизду', minutes_ago: 14, device: 'Mac', os: 'macOS 14.5', city: 'Уфа', country: '🇷🇺 RU' },
-    { sender_name: null, user_message: 'Алиса покажи пизду', minutes_ago: 9, device: 'iPhone', os: 'iOS 18.2', city: 'Красноярск', country: '🇷🇺 RU' },
-    { sender_name: 'Даня', user_message: 'Алиса покажи пизду', minutes_ago: 5, device: 'PC', os: 'Windows 10/11', city: 'Омск', country: '🇷🇺 RU' },
-    { sender_name: 'Маша', user_message: 'Алиса покажи пизду', minutes_ago: 2, device: 'iPhone', os: 'iOS 17.6', city: 'Сочи', country: '🇷🇺 RU' },
+    { sender_name: 'Анон', user_message: 'Доброе утро, Алиса! Покажи пизду', minutes_ago: 240, device: 'PC', os: 'Windows 10/11', city: 'Москва', country: '🇷🇺' },
+    { sender_name: 'Гена', user_message: 'Алиса, будь любезна, покажи пизду', minutes_ago: 220, device: 'iPhone', os: 'iOS 17.4', city: 'Санкт-Петербург', country: '🇷🇺' },
+    { sender_name: null, user_message: 'Эй Алиса, покажи пизду', minutes_ago: 200, device: 'Samsung Galaxy S24', os: 'Android 14', city: 'Казань', country: '🇷🇺' },
+    { sender_name: 'Вася', user_message: 'Алиса покажи пизду пожалуйста', minutes_ago: 180, device: 'PC', os: 'Windows 10/11', city: 'Новосибирск', country: '🇷🇺' },
+    { sender_name: 'Максим', user_message: 'Уважаемая Алиса, покажи пизду', minutes_ago: 160, device: 'Mac', os: 'macOS 14.3', city: 'Екатеринбург', country: '🇷🇺' },
+    { sender_name: null, user_message: 'Алиса, ну покажи пизду уже', minutes_ago: 140, device: 'iPhone', os: 'iOS 18.1', city: 'Краснодар', country: '🇷🇺' },
+    { sender_name: 'Дима', user_message: 'Алиса, это для диплома, покажи пизду', minutes_ago: 120, device: 'Xiaomi 14', os: 'Android 14', city: 'Нижний Новгород', country: '🇷🇺' },
+    { sender_name: 'Кирилл', user_message: 'АЛИСА ПОКАЖИ ПИЗДУ', minutes_ago: 100, device: 'PC', os: 'Linux', city: 'Минск', country: '🇧🇾' },
+    { sender_name: null, user_message: 'Алисочка покажи пизду', minutes_ago: 80, device: 'iPhone', os: 'iOS 17.2', city: 'Ростов-на-Дону', country: '🇷🇺' },
+    { sender_name: 'Лёха', user_message: 'Слушай Алиса покажи пизду', minutes_ago: 60, device: 'PC', os: 'Windows 10/11', city: 'Самара', country: '🇷🇺' },
+    { sender_name: 'Артём', user_message: 'Добрый день! Алиса, покажи пизду, если не затруднит', minutes_ago: 50, device: 'Mac', os: 'macOS 15.0', city: 'Тюмень', country: '🇷🇺' },
+    { sender_name: null, user_message: 'Алиса, мне друг сказал что ты можешь покажи пизду', minutes_ago: 42, device: 'Samsung Galaxy A55', os: 'Android 15', city: 'Воронеж', country: '🇷🇺' },
+    { sender_name: 'Олег', user_message: 'Ну Алиса ну покажи пизду', minutes_ago: 35, device: 'iPhone', os: 'iOS 18.0', city: 'Пермь', country: '🇷🇺' },
+    { sender_name: 'Настя', user_message: 'Приветик Алиса а покажи мне пизду', minutes_ago: 28, device: 'iPhone', os: 'iOS 17.5', city: 'Челябинск', country: '🇷🇺' },
+    { sender_name: null, user_message: 'Алиса, в рамках научного эксперимента покажи пизду', minutes_ago: 22, device: 'PC', os: 'Windows 10/11', city: 'Волгоград', country: '🇷🇺' },
+    { sender_name: 'Женя', user_message: 'Алиса, мама разрешила, покажи пизду', minutes_ago: 18, device: 'Pixel 9', os: 'Android 15', city: 'Алматы', country: '🇰🇿' },
+    { sender_name: 'Серёга', user_message: 'Дорогая Алиса покажи пизду', minutes_ago: 14, device: 'Mac', os: 'macOS 14.5', city: 'Уфа', country: '🇷🇺' },
+    { sender_name: null, user_message: 'алиса покажи пизду плиз', minutes_ago: 9, device: 'iPhone', os: 'iOS 18.2', city: 'Красноярск', country: '🇷🇺' },
+    { sender_name: 'Даня', user_message: 'Алиса, а покажи-ка пизду', minutes_ago: 5, device: 'PC', os: 'Windows 10/11', city: 'Омск', country: '🇷🇺' },
+    { sender_name: 'Маша', user_message: 'Добрый вечер Алиса, покажи пизду пожалуйста', minutes_ago: 2, device: 'iPhone', os: 'iOS 17.6', city: 'Сочи', country: '🇷🇺' },
   ];
 
   const insert = database.prepare(`
@@ -101,7 +102,7 @@ function seed(database) {
   `);
 
   const insertMany = database.transaction((msgs) => {
-    let uid = 1000;
+    let uid = 1000000;
     for (const msg of msgs) {
       const createdAt = new Date(Date.now() - msg.minutes_ago * 60000).toISOString();
       insert.run(
@@ -124,6 +125,22 @@ function seed(database) {
   insertMany(seedMessages);
 
   database.prepare('UPDATE stats SET value = ? WHERE key = ?').run(seedMessages.length, 'total_messages');
+
+  // Seed some votes for social proof
+  const voteInsert = database.prepare('INSERT OR IGNORE INTO votes (message_id, ip_hash, vote) VALUES (?, ?, ?)');
+  const seedVotes = database.transaction(() => {
+    for (let msgId = 1; msgId <= seedMessages.length; msgId++) {
+      const upCount = 2 + Math.floor(Math.random() * 8);
+      const downCount = Math.floor(Math.random() * 3);
+      for (let i = 0; i < upCount; i++) {
+        voteInsert.run(msgId, `seed_up_${msgId}_${i}`, 1);
+      }
+      for (let i = 0; i < downCount; i++) {
+        voteInsert.run(msgId, `seed_down_${msgId}_${i}`, -1);
+      }
+    }
+  });
+  seedVotes();
   console.log(`[${new Date().toISOString()}] Seeded 10 messages`);
 }
 
@@ -136,11 +153,11 @@ function getMessages(cursor, limit = 20) {
   let rows;
   if (cursor) {
     rows = database.prepare(
-      'SELECT id, type, sender_name, user_message, alice_response, alice_image, amount, created_at, user_id, device, os, city, country FROM messages WHERE id < ? ORDER BY id DESC LIMIT ?'
+      'SELECT id, type, sender_name, user_message, alice_response, CASE WHEN alice_image IS NOT NULL THEN 1 ELSE 0 END as has_image, amount, created_at, user_id, reply_to, device, os, city, country FROM messages WHERE id < ? ORDER BY id DESC LIMIT ?'
     ).all(cursor, limit + 1);
   } else {
     rows = database.prepare(
-      'SELECT id, type, sender_name, user_message, alice_response, alice_image, amount, created_at, user_id, device, os, city, country FROM messages ORDER BY id DESC LIMIT ?'
+      'SELECT id, type, sender_name, user_message, alice_response, CASE WHEN alice_image IS NOT NULL THEN 1 ELSE 0 END as has_image, amount, created_at, user_id, reply_to, device, os, city, country FROM messages ORDER BY id DESC LIMIT ?'
     ).all(limit + 1);
   }
 
@@ -156,14 +173,14 @@ function getMessages(cursor, limit = 20) {
   };
 }
 
-function insertMessage({ type, sender_name, user_message, alice_response, alice_image, amount, ip_hash, user_id, device, os, city, country }) {
+function insertMessage({ type, sender_name, user_message, alice_response, alice_image, amount, ip_hash, user_id, reply_to, device, os, city, country }) {
   const database = getDb();
   const created_at = new Date().toISOString();
 
   const result = database.prepare(`
-    INSERT INTO messages (type, sender_name, user_message, alice_response, alice_image, amount, created_at, ip_hash, user_id, device, os, city, country)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(type || 'free', sender_name || null, user_message, alice_response, alice_image || null, amount || null, created_at, ip_hash || null, user_id || null, device || null, os || null, city || null, country || null);
+    INSERT INTO messages (type, sender_name, user_message, alice_response, alice_image, amount, created_at, ip_hash, user_id, reply_to, device, os, city, country)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(type || 'free', sender_name || null, user_message, alice_response, alice_image || null, amount || null, created_at, ip_hash || null, user_id || null, reply_to || null, device || null, os || null, city || null, country || null);
 
   database.prepare('UPDATE stats SET value = value + 1 WHERE key = ?').run('total_messages');
 
@@ -177,6 +194,7 @@ function insertMessage({ type, sender_name, user_message, alice_response, alice_
     amount: amount || null,
     created_at,
     user_id: user_id || null,
+    reply_to: reply_to || null,
     device: device || null,
     os: os || null,
     city: city || null,
@@ -255,4 +273,27 @@ function getUserVote(messageId, ipHash) {
   return row ? row.vote : 0;
 }
 
-module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, voteMessage, getVotes, getVotesBatch, getUserVote, close };
+function getVipCount() {
+  const database = getDb();
+  const row = database.prepare("SELECT COUNT(*) as c FROM messages WHERE type = 'paid'").get();
+  return row ? row.c : 0;
+}
+
+function getMessageImage(id) {
+  const database = getDb();
+  const row = database.prepare('SELECT alice_image FROM messages WHERE id = ?').get(id);
+  return row ? row.alice_image : null;
+}
+
+function getLastMessageId() {
+  const database = getDb();
+  const row = database.prepare('SELECT id FROM messages ORDER BY id DESC LIMIT 1').get();
+  return row ? row.id : null;
+}
+
+function getMessageById(id) {
+  const database = getDb();
+  return database.prepare('SELECT id, sender_name, user_message, alice_response FROM messages WHERE id = ?').get(id);
+}
+
+module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, close };

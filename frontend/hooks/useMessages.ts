@@ -18,6 +18,7 @@ export function useMessages() {
   const [nextCursor, setNextCursor] = useState<number | null>(null);
   const [totalMessages, setTotalMessages] = useState(0);
   const [onlineCount, setOnlineCount] = useState(0);
+  const [vipCount, setVipCount] = useState(0);
   const [streamingState, setStreamingState] = useState<StreamingState>({});
 
   const loadedRef = useRef(false);
@@ -39,6 +40,7 @@ export function useMessages() {
         setHasMore(messagesData.has_more);
         setTotalMessages(statsData.total_messages);
         setOnlineCount(statsData.online_count);
+        setVipCount(statsData.vip_count || 0);
       } catch (err) {
         console.error('Failed to load initial data:', err);
       } finally {
@@ -105,7 +107,7 @@ export function useMessages() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
-            ? { ...m, alice_response: fullResponse, alice_image: aliceImage || null }
+            ? { ...m, alice_response: fullResponse, alice_image: aliceImage || null, has_image: aliceImage ? 1 : (m.has_image || 0) }
             : m
         )
       );
@@ -167,6 +169,7 @@ export function useMessages() {
     completeMessage,
     updateVotes,
     updateMessageName,
+    vipCount,
     updateOnlineCount,
     setTotalMessages,
   };

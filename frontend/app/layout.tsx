@@ -13,6 +13,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://xn--80aaaqjgddaqi2bmfw7b.xn--p1ai'),
   title: 'Экспериментальная платформа изучения поведения нейросетей',
   description: 'Открытое исследование в области взаимодействия человека с искусственным интеллектом. Присоединяйтесь к эксперименту.',
   openGraph: {

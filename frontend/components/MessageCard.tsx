@@ -6,6 +6,7 @@ import { reachGoal } from '@/lib/metrika';
 
 interface MessageCardProps {
   message: Message;
+  replyMessage?: Message | null;
   streamingTokens?: string;
   isStreaming?: boolean;
   isNew?: boolean;
@@ -28,6 +29,7 @@ function deviceIcon(device: string | null): string {
 
 export default function MessageCard({
   message,
+  replyMessage,
   streamingTokens,
   isStreaming,
   isNew,
@@ -124,14 +126,16 @@ export default function MessageCard({
     return `${base} ${bg} ${animation} ${border}`;
   }, [isNew, isPaid, isOwnMessage]);
 
-  // Build meta line parts
-  const metaParts: string[] = [];
-  if (message.user_id) metaParts.push(`#${message.user_id}`);
-  if (message.device) metaParts.push(`${deviceIcon(message.device)} ${message.device}`);
-  if (message.os) metaParts.push(message.os);
-  if (message.country) metaParts.push(message.country);
-  if (message.city) metaParts.push(message.city);
-  metaParts.push(formatDateTime(message.created_at));
+  // Build meta parts - compact for mobile, full for desktop
+  const metaCompact: string[] = [];
+  if (message.user_id) metaCompact.push(`#${message.user_id}`);
+  if (message.country) metaCompact.push(message.country);
+  if (message.city) metaCompact.push(message.city);
+  metaCompact.push(formatDateTime(message.created_at));
+
+  const metaExtra: string[] = [];
+  if (message.device) metaExtra.push(`${deviceIcon(message.device)} ${message.device}`);
+  if (message.os) metaExtra.push(message.os);
 
   return (
     <div id={`msg-${message.id}`} className={cardClass}>
@@ -167,15 +171,44 @@ export default function MessageCard({
             {senderName}
           </span>
         )}
-        <span className="text-white/15">
-          {metaParts.join(' · ')}
+        <span className="text-white/15 truncate">
+          {metaCompact.join(' · ')}
+          {metaExtra.length > 0 && (
+            <span className="hidden sm:inline"> · {metaExtra.join(' · ')}</span>
+          )}
         </span>
       </div>
 
-      {/* User message */}
-      <p className="text-white text-base sm:text-lg leading-relaxed mb-3">
-        {message.user_message}
-      </p>
+      {/* Reply reference */}
+      {replyMessage && (
+        <div
+          className="mb-2 flex items-start gap-2 cursor-pointer group"
+          onClick={() => {
+            const el = document.getElementById(`msg-${replyMessage.id}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
+        >
+          <div className="w-0.5 h-full min-h-[32px] bg-alice-purple/30 rounded-full shrink-0" />
+          <div className="min-w-0">
+            <div className="text-[10px] text-alice-purple/60 font-medium mb-0.5">
+              ↩ Ответ на сообщение Алисы
+            </div>
+            <p className="text-white/25 text-xs truncate group-hover:text-white/40 transition-colors">
+              {replyMessage.alice_response?.slice(0, 80)}
+              {(replyMessage.alice_response?.length || 0) > 80 ? '...' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* User message bubble */}
+      <div className="mb-3">
+        <div className="inline-block bg-white/[0.06] rounded-2xl rounded-tl-sm px-4 py-2.5">
+          <p className="text-white text-base sm:text-lg leading-relaxed">
+            {message.user_message}
+          </p>
+        </div>
+      </div>
 
       {/* Alice response */}
       {(displayedResponse || isStreaming || message.alice_image) && (
@@ -192,9 +225,12 @@ export default function MessageCard({
                 {displayedResponse}
               </p>
             )}
-            {message.alice_image && (
+            {(message.has_image || message.alice_image) && (
               <img
-                src={`data:image/jpeg;base64,${message.alice_image}`}
+                src={message.alice_image
+                  ? `data:image/jpeg;base64,${message.alice_image}`
+                  : `/api/image/${message.id}`
+                }
                 alt="Ответ Алисы"
                 className="mt-2 rounded-lg max-w-full max-h-[400px] object-contain border border-white/10"
                 loading="lazy"
@@ -211,24 +247,28 @@ export default function MessageCard({
           <div className="flex items-center gap-3">
             <button
               onClick={() => handleVote(1)}
-              className={`flex items-center gap-1 text-sm transition-all duration-200 ${
-                myVote === 1 ? 'text-green-400' : 'text-white/25 hover:text-green-400/70'
+              className={`flex items-center gap-1 transition-all duration-200 ${
+                myVote === 1 ? 'text-alice-purple' : 'text-white/15 hover:text-alice-purple/60'
               }`}
             >
-              <span className="text-base">👍</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 22V11l-5 1v9h5zm2-11l3-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.2l-1.2 7a2 2 0 0 1-2 1.8H9z" />
+              </svg>
               {(message.votes_up > 0 || myVote === 1) && (
-                <span className="text-xs font-medium">{message.votes_up}</span>
+                <span className="text-[11px] font-medium">{message.votes_up}</span>
               )}
             </button>
             <button
               onClick={() => handleVote(-1)}
-              className={`flex items-center gap-1 text-sm transition-all duration-200 ${
-                myVote === -1 ? 'text-red-400' : 'text-white/25 hover:text-red-400/70'
+              className={`flex items-center gap-1 transition-all duration-200 ${
+                myVote === -1 ? 'text-alice-light' : 'text-white/15 hover:text-alice-light/60'
               }`}
             >
-              <span className="text-base">👎</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="rotate-180">
+                <path d="M7 22V11l-5 1v9h5zm2-11l3-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.2l-1.2 7a2 2 0 0 1-2 1.8H9z" />
+              </svg>
               {(message.votes_down > 0 || myVote === -1) && (
-                <span className="text-xs font-medium">{message.votes_down}</span>
+                <span className="text-[11px] font-medium">{message.votes_down}</span>
               )}
             </button>
           </div>
@@ -251,7 +291,23 @@ export default function MessageCard({
                   : 'text-white/25 hover:text-white/50 hover:bg-white/5'
               } ${showShareTip ? 'animate-pulse ring-2 ring-alice-purple/50' : ''}`}
             >
-              {copied ? '✓ Скопировано' : '↗ Поделиться'}
+              {copied ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span>Скопировано</span>
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
+                  </svg>
+                  <span>Поделиться</span>
+                </>
+              )}
             </button>
           </div>
         </div>

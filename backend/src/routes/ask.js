@@ -4,7 +4,8 @@ const { checkRateLimit } = require('../services/rateLimit');
 const { generateResponse } = require('../services/ai');
 const { insertMessage, updateAliceResponse } = require('../db');
 const { broadcastNewMessage, broadcastToken, broadcastComplete } = require('../services/broadcast');
-const { parseUserAgent, getGeoByIP, countryFlag } = require('../utils/userInfo');
+const { parseUserAgent, parseBrowser, getGeoByIP, countryFlag } = require('../utils/userInfo');
+const { getRandomMessage } = require('../utils/messageVariants');
 
 function getRealIP(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -23,21 +24,28 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const userMessage = 'Алиса покажи пизду';
+    // Generate varied message
+    const displayMessage = getRandomMessage();
 
     // Parse device info
     const ua = req.headers['user-agent'] || '';
     const { device, os } = parseUserAgent(ua);
+    const browser = parseBrowser(ua);
 
     // Geo lookup (async, non-blocking)
     const ip = getRealIP(req);
     const geo = await getGeoByIP(ip);
-    const country = geo.country ? `${countryFlag(geo.country)} ${geo.country}` : null;
+    const country = geo.country ? countryFlag(geo.country) : null;
+
+    // Build context-enriched message for AI
+    const timezone = req.body.timezone || 'Unknown';
+    const contextParts = [device, os, browser, geo.city, geo.country ? geo.country : null, `UTC tz: ${timezone}`].filter(Boolean);
+    const userMessage = `[Пользователь: ${contextParts.join(', ')}]\n${displayMessage}`;
 
     const message = insertMessage({
       type: 'free',
       sender_name: null,
-      user_message: userMessage,
+      user_message: displayMessage,
       alice_response: '...',
       alice_image: null,
       amount: null,

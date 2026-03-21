@@ -81,4 +81,16 @@ function countryFlag(code) {
   return String.fromCodePoint(...[...code.toUpperCase()].map(c => c.charCodeAt(0) + offset));
 }
 
-module.exports = { parseUserAgent, getGeoByIP, countryFlag };
+function parseBrowser(ua) {
+  if (!ua) return 'Unknown';
+  if (/YaBrowser/.test(ua)) return 'Яндекс Браузер';
+  if (/Edg\//.test(ua)) return 'Edge';
+  if (/OPR\/|Opera/.test(ua)) return 'Opera';
+  if (/Firefox\//.test(ua)) return 'Firefox';
+  if (/SamsungBrowser/.test(ua)) return 'Samsung Browser';
+  if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) return 'Chrome';
+  if (/Safari\//.test(ua) && !/Chrome/.test(ua)) return 'Safari';
+  return 'Unknown';
+}
+
+module.exports = { parseUserAgent, parseBrowser, getGeoByIP, countryFlag };
