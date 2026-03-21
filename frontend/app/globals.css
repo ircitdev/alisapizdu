@@ -10,6 +10,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -92,6 +93,12 @@ body {
 .vip-card {
   border: 2px solid #ffd700;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+}
+
+/* Invite card border */
+.invite-card {
+  border: 1px solid rgba(123, 104, 238, 0.2);
+  box-shadow: 0 0 10px rgba(123, 104, 238, 0.08);
 }
 
 /* Sticky bottom panel */

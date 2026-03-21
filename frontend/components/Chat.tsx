@@ -8,6 +8,7 @@ import MessageCard from './MessageCard';
 import AskButton from './AskButton';
 import CustomMessageModal from './CustomMessageModal';
 import DonateModal from './DonateModal';
+import InviteModal from './InviteModal';
 import LegalModal from './LegalModal';
 import { reachGoal } from '@/lib/metrika';
 
@@ -37,6 +38,7 @@ export default function Chat() {
   const [modalOpen, setModalOpen] = useState(false);
   const [donateOpen, setDonateOpen] = useState(false);
   const [legalType, setLegalType] = useState<'privacy' | 'terms' | 'cookies' | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [newMessageIds, setNewMessageIds] = useState<Set<number>>(new Set());
   const [hasAsked, setHasAsked] = useState(false);
   const [fakeOnline, setFakeOnline] = useState(0);
@@ -209,6 +211,7 @@ export default function Chat() {
                 streamingTokens={streaming?.tokens}
                 isStreaming={!!streaming && !streaming.isComplete}
                 isNew={newMessageIds.has(msg.id)}
+                onInvite={() => setInviteOpen(true)}
               />
             );
           })}
@@ -218,7 +221,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} hasAsked={hasAsked} />
+      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => setInviteOpen(true)} hasAsked={hasAsked} />
 
       <CustomMessageModal
         isOpen={modalOpen}
@@ -228,6 +231,11 @@ export default function Chat() {
       <DonateModal
         isOpen={donateOpen}
         onClose={() => setDonateOpen(false)}
+      />
+
+      <InviteModal
+        isOpen={inviteOpen}
+        onClose={() => setInviteOpen(false)}
       />
 
       <LegalModal

@@ -1,6 +1,21 @@
+export interface InviteResponse {
+  code: string;
+  url: string;
+  preset_name: string;
+  allow_rename: boolean;
+}
+
+export interface InviteInfo {
+  code: string;
+  preset_name: string;
+  allow_rename: boolean;
+  used: boolean;
+  created_by_user_id: number | null;
+}
+
 export interface Message {
   id: number;
-  type: 'free' | 'paid';
+  type: 'free' | 'paid' | 'invite';
   sender_name: string | null;
   user_message: string;
   alice_response: string;
@@ -128,4 +143,36 @@ export async function updateName(
 
 export function getMessageShareUrl(messageId: number): string {
   return `${window.location.origin}/#msg-${messageId}`;
+}
+
+export async function createInvite(
+  presetName: string,
+  allowRename: boolean,
+  notifyEmail?: string,
+  userId?: number | null
+): Promise<InviteResponse> {
+  return apiFetch<InviteResponse>('/invite', {
+    method: 'POST',
+    body: JSON.stringify({
+      preset_name: presetName,
+      allow_rename: allowRename,
+      notify_email: notifyEmail || undefined,
+      user_id: userId || undefined,
+    }),
+  });
+}
+
+export async function getInvite(code: string): Promise<InviteInfo> {
+  return apiFetch<InviteInfo>(`/invite/${code}`);
+}
+
+export async function useInvite(
+  code: string,
+  name?: string,
+  timezone?: string
+): Promise<AskResponse> {
+  return apiFetch<AskResponse>(`/invite/${code}/use`, {
+    method: 'POST',
+    body: JSON.stringify({ name, timezone }),
+  });
 }

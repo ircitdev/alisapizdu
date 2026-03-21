@@ -6,6 +6,7 @@ import { reachGoal } from '@/lib/metrika';
 
 interface AskButtonProps {
   onCustomClick: () => void;
+  onInviteClick: () => void;
   hasAsked: boolean;
 }
 
@@ -28,7 +29,7 @@ function formatRemaining(ms: number): string {
   return `${minutes} мин`;
 }
 
-export default function AskButton({ onCustomClick, hasAsked }: AskButtonProps) {
+export default function AskButton({ onCustomClick, onInviteClick, hasAsked }: AskButtonProps) {
   const [state, setState] = useState<ButtonState>('idle');
   const [remaining, setRemaining] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -119,18 +120,32 @@ export default function AskButton({ onCustomClick, hasAsked }: AskButtonProps) {
         )}
 
         {state === 'used' || hasAsked ? (
-          <button
-            onClick={onCustomClick}
-            className="
-              w-full py-3.5 px-6 rounded-xl border-2 border-vip-gold/40
-              text-vip-gold font-semibold text-base sm:text-lg
-              hover:border-vip-gold hover:bg-vip-gold/5
-              transition-all duration-300 select-none
-              active:scale-[0.98]
-            "
-          >
-            Написать своё &mdash; 1000&thinsp;&#8381;
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={onCustomClick}
+              className="
+                flex-1 py-3.5 px-4 rounded-xl border-2 border-vip-gold/40
+                text-vip-gold font-semibold text-sm sm:text-base
+                hover:border-vip-gold hover:bg-vip-gold/5
+                transition-all duration-300 select-none
+                active:scale-[0.98]
+              "
+            >
+              Написать своё &mdash; 1000&thinsp;&#8381;
+            </button>
+            <button
+              onClick={onInviteClick}
+              className="
+                py-3.5 px-4 rounded-xl border-2 border-alice-purple/40
+                text-alice-purple font-semibold text-sm sm:text-base
+                hover:border-alice-purple hover:bg-alice-purple/5
+                transition-all duration-300 select-none
+                active:scale-[0.98] whitespace-nowrap
+              "
+            >
+              Пригласить
+            </button>
+          </div>
         ) : (
           <button
             onClick={handleAsk}

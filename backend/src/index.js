@@ -17,6 +17,7 @@ const nameRouter = require('./routes/name');
 const voteRouter = require('./routes/vote');
 const askCustomRouter = require('./routes/askCustom');
 const imageRouter = require('./routes/image');
+const inviteRouter = require('./routes/invite');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -58,6 +59,7 @@ app.use('/api/name', nameRouter);
 app.use('/api/vote', voteRouter);
 app.use('/api/ask-custom', askCustomRouter);
 app.use('/api/image', imageRouter);
+app.use('/api/invite', inviteRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

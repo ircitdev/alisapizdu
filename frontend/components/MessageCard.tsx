@@ -10,6 +10,7 @@ interface MessageCardProps {
   streamingTokens?: string;
   isStreaming?: boolean;
   isNew?: boolean;
+  onInvite?: () => void;
 }
 
 function formatDateTime(isoString: string): string {
@@ -33,6 +34,7 @@ export default function MessageCard({
   streamingTokens,
   isStreaming,
   isNew,
+  onInvite,
 }: MessageCardProps) {
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -42,6 +44,7 @@ export default function MessageCard({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isPaid = message.type === 'paid';
+  const isInvite = message.type === 'invite';
   const senderName = message.sender_name || 'Аноним';
   const displayedResponse = isStreaming ? streamingTokens || '' : message.alice_response;
 
@@ -57,11 +60,30 @@ export default function MessageCard({
     if (saved) setMyVote(parseInt(saved, 10) as 1 | -1);
   }, [message.id]);
 
-  // Share tooltip
+  const [showNameTip, setShowNameTip] = useState(false);
+
+  // Name tooltip — show first, then share tooltip
   useEffect(() => {
     if (isOwnMessage && !isStreaming && message.alice_response && message.alice_response !== '...') {
-      const tipShown = localStorage.getItem('alisapizdu_tip_shown');
-      if (!tipShown) {
+      const nameTipShown = localStorage.getItem('alisapizdu_name_tip');
+      const shareTipShown = localStorage.getItem('alisapizdu_tip_shown');
+
+      if (!nameTipShown) {
+        // Show name tip first
+        setTimeout(() => setShowNameTip(true), 1000);
+        setTimeout(() => {
+          setShowNameTip(false);
+          localStorage.setItem('alisapizdu_name_tip', '1');
+          // Then show share tip
+          if (!shareTipShown) {
+            setTimeout(() => setShowShareTip(true), 500);
+            setTimeout(() => {
+              setShowShareTip(false);
+              localStorage.setItem('alisapizdu_tip_shown', '1');
+            }, 4000);
+          }
+        }, 4000);
+      } else if (!shareTipShown) {
         setTimeout(() => setShowShareTip(true), 1500);
         setTimeout(() => { setShowShareTip(false); localStorage.setItem('alisapizdu_tip_shown', '1'); }, 5000);
       }
@@ -122,16 +144,15 @@ export default function MessageCard({
     const base = 'message-card relative rounded-xl p-4 transition-all duration-200';
     const bg = 'bg-bg-card hover:bg-bg-card_hover';
     const animation = isNew ? 'animate-slide-in' : '';
-    const border = isPaid ? 'vip-card' : isOwnMessage ? 'own-card' : 'border border-white/5';
+    const border = isPaid ? 'vip-card' : isInvite ? 'invite-card' : isOwnMessage ? 'own-card' : 'border border-white/5';
     return `${base} ${bg} ${animation} ${border}`;
-  }, [isNew, isPaid, isOwnMessage]);
+  }, [isNew, isPaid, isInvite, isOwnMessage]);
 
   // Build meta parts - compact for mobile, full for desktop
   const metaCompact: string[] = [];
   if (message.user_id) metaCompact.push(`#${message.user_id}`);
   if (message.country) metaCompact.push(message.country);
   if (message.city) metaCompact.push(message.city);
-  metaCompact.push(formatDateTime(message.created_at));
 
   const metaExtra: string[] = [];
   if (message.device) metaExtra.push(`${deviceIcon(message.device)} ${message.device}`);
@@ -146,37 +167,57 @@ export default function MessageCard({
           </span>
         </div>
       )}
+      {isInvite && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-alice-purple/70 text-[10px]">🔗 По приглашению</span>
+        </div>
+      )}
 
-      {/* Header: name + meta in one line */}
-      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap text-[10px] sm:text-[11px]">
-        {editing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value.slice(0, 30))}
-            onKeyDown={handleNameKeyDown}
-            onBlur={handleNameSubmit}
-            placeholder="Введите имя"
-            className="bg-transparent border-b border-alice-purple/50 text-white/80 text-sm
-                       font-medium outline-none w-28 py-0.5"
-          />
-        ) : (
-          <span
-            onClick={handleNameClick}
-            className={`text-white/60 text-sm font-medium ${
-              isOwnMessage ? 'border-b border-dashed border-white/30 cursor-pointer hover:text-white/70' : ''
-            }`}
-          >
-            {senderName}
+      {/* Header: name + meta */}
+      <div className="flex items-baseline justify-between gap-1.5 mb-1.5 text-[10px] sm:text-[11px]">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="relative shrink-0">
+            {showNameTip && (
+              <div className="absolute -top-9 left-0 bg-alice-purple text-white text-xs px-3 py-1.5
+                              rounded-lg whitespace-nowrap animate-fade-in shadow-lg z-10">
+                Нажми, чтобы указать имя ☝
+                <div className="absolute left-4 -bottom-[6px] w-0 h-0 border-l-[6px] border-l-transparent
+                                border-r-[6px] border-r-transparent border-t-[6px] border-t-alice-purple" />
+              </div>
+            )}
+            {editing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value.slice(0, 30))}
+                onKeyDown={handleNameKeyDown}
+                onBlur={handleNameSubmit}
+                placeholder="Введите имя"
+                className="bg-transparent border-b border-alice-purple/50 text-white/80 text-sm
+                           font-medium outline-none w-28 py-0.5"
+              />
+            ) : (
+              <span
+                onClick={handleNameClick}
+                className={`text-white/60 text-sm font-medium ${
+                  isOwnMessage
+                    ? 'border-b border-dashed border-white/30 cursor-pointer hover:text-white/70'
+                    : ''
+                } ${showNameTip ? 'text-white/80 animate-pulse' : ''}`}
+              >
+                {senderName}
+              </span>
+            )}
+          </div>
+          <span className="text-white/15 truncate">
+            {metaCompact.join(' · ')}
+            {metaExtra.length > 0 && (
+              <span className="hidden sm:inline"> · {metaExtra.join(' · ')}</span>
+            )}
           </span>
-        )}
-        <span className="text-white/15 truncate">
-          {metaCompact.join(' · ')}
-          {metaExtra.length > 0 && (
-            <span className="hidden sm:inline"> · {metaExtra.join(' · ')}</span>
-          )}
-        </span>
+        </div>
+        <span className="text-white/20 text-[10px] shrink-0">{formatDateTime(message.created_at)}</span>
       </div>
 
       {/* Reply reference */}
@@ -273,8 +314,8 @@ export default function MessageCard({
             </button>
           </div>
 
-          {/* Share */}
-          <div className="relative">
+          {/* Share + Invite */}
+          <div className="flex items-center gap-1.5 relative">
             {showShareTip && (
               <div className="absolute -left-40 -top-1 bg-alice-purple text-white text-xs px-3 py-1.5
                               rounded-lg whitespace-nowrap animate-fade-in shadow-lg z-10">
@@ -309,6 +350,21 @@ export default function MessageCard({
                 </>
               )}
             </button>
+            {onInvite && (
+              <button
+                onClick={onInvite}
+                className="flex items-center gap-1 text-xs transition-all duration-200 px-2 py-1 rounded-lg
+                           text-alice-purple/60 hover:text-alice-purple hover:bg-alice-purple/10"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <line x1="19" y1="8" x2="19" y2="14" />
+                  <line x1="22" y1="11" x2="16" y2="11" />
+                </svg>
+                <span className="hidden sm:inline">Пригласить</span>
+              </button>
+            )}
           </div>
         </div>
       )}

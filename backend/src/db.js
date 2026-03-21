@@ -59,6 +59,21 @@ function getDb() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_votes_message ON votes(message_id);
+
+    CREATE TABLE IF NOT EXISTS invite_links (
+      id TEXT PRIMARY KEY,
+      created_by_ip TEXT,
+      created_by_user_id INTEGER,
+      preset_name TEXT NOT NULL,
+      allow_rename INTEGER DEFAULT 0,
+      notify_email TEXT,
+      message_id INTEGER,
+      used_at TEXT,
+      used_by_ip TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_invite_created_by ON invite_links(created_by_ip);
   `);
 
   seed(db);
@@ -296,4 +311,43 @@ function getMessageById(id) {
   return database.prepare('SELECT id, sender_name, user_message, alice_response FROM messages WHERE id = ?').get(id);
 }
 
-module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, close };
+// --- Invite links ---
+
+function createInviteLink({ id, created_by_ip, created_by_user_id, preset_name, allow_rename, notify_email }) {
+  const database = getDb();
+  const created_at = new Date().toISOString();
+  database.prepare(`
+    INSERT INTO invite_links (id, created_by_ip, created_by_user_id, preset_name, allow_rename, notify_email, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(id, created_by_ip, created_by_user_id, preset_name, allow_rename ? 1 : 0, notify_email || null, created_at);
+  return { id, preset_name, allow_rename: !!allow_rename, notify_email: notify_email || null, created_at };
+}
+
+function getInviteLink(code) {
+  const database = getDb();
+  return database.prepare('SELECT * FROM invite_links WHERE id = ?').get(code);
+}
+
+function markInviteUsed(code, messageId, usedByIp) {
+  const database = getDb();
+  database.prepare('UPDATE invite_links SET message_id = ?, used_at = ?, used_by_ip = ? WHERE id = ?')
+    .run(messageId, new Date().toISOString(), usedByIp, code);
+}
+
+function countInvitesByIp(ipHash) {
+  const database = getDb();
+  const row = database.prepare('SELECT COUNT(*) as c FROM invite_links WHERE created_by_ip = ?').get(ipHash);
+  return row ? row.c : 0;
+}
+
+function countInviteEmailsToday(email) {
+  const database = getDb();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const row = database.prepare(
+    "SELECT COUNT(*) as c FROM invite_links WHERE notify_email = ? AND used_at IS NOT NULL AND used_at > ?"
+  ).get(email, today.toISOString());
+  return row ? row.c : 0;
+}
+
+module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, createInviteLink, getInviteLink, markInviteUsed, countInvitesByIp, countInviteEmailsToday, close };
