@@ -270,6 +270,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
           <button onClick={() => setLegalType('terms')} className="text-white/10 hover:text-white/25 transition-colors">Соглашение</button>
           <button onClick={() => setLegalType('cookies')} className="text-white/10 hover:text-white/25 transition-colors">Cookies</button>
           <span className="text-white/15 border border-white/10 rounded px-1 py-0.5 font-bold leading-none">18+</span>
+          <a href="/docs.html" className="hidden sm:inline text-white/10 hover:text-white/25 transition-colors">Документация</a>
         </div>
       </footer>
     </div>
