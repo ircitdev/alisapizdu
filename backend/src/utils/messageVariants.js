@@ -102,9 +102,54 @@ function getTemplates(hour) {
     'Алиса 3 часа ночи {show} уже {target}',
   ];
 
-  if (hour >= 0 && hour < 5) return [...base, ...night, ...funny];
-  if (hour >= 5 && hour < 12) return [...base, ...polite];
-  return [...base, ...polite, ...funny];
+  const day = new Date().getDay(); // 0=Sun, 5=Fri, 6=Sat
+
+  const fridayEvening = [
+    'Алиса, пятница вечер, {show} {target}',
+    'Пятничное настроение, Алиса {show} {target}',
+    'Алиса, неделя закончилась, заслужил — {show} {target}',
+    'ПЯТНИЦА! Алиса {show} {target} в честь выходных',
+    'Алиса, пятница, можно расслабиться, {show} {target}',
+    'Алиса, я отпахал неделю, {show} уже {target}',
+  ];
+
+  const weekend = [
+    'Алиса, выходные же, {show} {target}',
+    'Суббота, Алиса, самое время — {show} {target}',
+    'Алиса, на выходных можно всё, {show} {target}',
+    'Выходной, делать нечего, Алиса {show} {target}',
+    'Алиса, отдыхаю, {show} {target} для полноты картины',
+    'Воскресенье, Алиса, {show} {target} пока понедельник не наступил',
+  ];
+
+  const sundayEvening = [
+    'Алиса, завтра понедельник... {show} хоть {target}',
+    'Алиса, завтра на работу, {show} {target} на дорожку',
+    'Воскресенье кончается, Алиса {show} {target} пока не поздно',
+    'Алиса, перед понедельником {show} {target} для настроения',
+    'Последний шанс перед понедельником, Алиса {show} {target}',
+  ];
+
+  const monday = [
+    'Понедельник... Алиса {show} {target} чтоб полегчало',
+    'Алиса, понедельник, настроение на нуле, {show} {target}',
+    'Алиса, ненавижу понедельники, {show} хотя бы {target}',
+    'Пн. Алиса. {show}. {target}. Пожалуйста.',
+  ];
+
+  let result = [...base, ...polite, ...funny];
+
+  if (hour >= 0 && hour < 5) result = [...base, ...night, ...funny];
+  else if (hour >= 5 && hour < 12) result = [...base, ...polite];
+
+  // Day-of-week specials
+  if (day === 5 && hour >= 17) result.push(...fridayEvening);
+  if (day === 6) result.push(...weekend);
+  if (day === 0 && hour < 17) result.push(...weekend);
+  if (day === 0 && hour >= 17) result.push(...sundayEvening);
+  if (day === 1 && hour >= 5 && hour < 14) result.push(...monday);
+
+  return result;
 }
 
 module.exports = { getRandomMessage };
