@@ -89,7 +89,7 @@ pm2 start frontend/node_modules/.bin/next --name alisapizdu-frontend -- start
 
 | Метод | Путь | Описание | Rate limit |
 |-------|------|----------|-----------|
-| POST | `/api/ask` | Бесплатный вопрос Алисе | 1 / 24ч на IP |
+| POST | `/api/ask` | Бесплатный вопрос Алисе | 1 / 24ч на IP (БД) |
 | POST | `/api/ask-custom` | Платный произвольный вопрос | Нет |
 | GET | `/api/messages` | Список сообщений (cursor pagination) | Нет |
 | GET | `/api/messages/stream` | SSE поток событий | Нет |
@@ -270,7 +270,7 @@ UNIQUE(message_id, ip_hash)
 │   │   ├── services/
 │   │   │   ├── ai.js             # YandexGPT + YandexART + mock
 │   │   │   ├── broadcast.js      # SSE клиенты + broadcast
-│   │   │   ├── rateLimit.js      # Rate limit (in-memory, 24ч)
+│   │   │   ├── rateLimit.js      # Rate limit (БД, 24ч, защита от incognito)
 │   │   │   └── email.js          # SMTP уведомления
 │   │   └── utils/
 │   │       ├── hash.js           # SHA256 хеширование IP
