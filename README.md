@@ -400,6 +400,14 @@ RootLayout (layout.tsx)
 
 Сервер: `31.44.7.144` (root), PM2 + Nginx + Let's Encrypt.
 
+**Важно:** `frontend/.env.local` должен содержать правильный порт бэкенда:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3010
+```
+
+Порты: backend = 3010, frontend = 3011.
+
 ```bash
 # 1. Загрузить файлы
 scp -r backend/src/ 31.44.7.144:/var/www/alisapizdu/backend/src/

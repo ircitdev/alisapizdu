@@ -79,7 +79,7 @@ async function sendInviteNotification({ to, presetName, senderName, device, os, 
     await t.sendMail({
       from,
       to,
-      subject: `Ваша ссылка сработала! ${presetName} спросил Алису`,
+      subject: `${presetName} принял участие в эксперименте`,
       html,
     });
     const [local, domain] = to.split('@');
