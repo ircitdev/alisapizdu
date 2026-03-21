@@ -37,10 +37,8 @@ router.post('/', async (req, res) => {
     const geo = await getGeoByIP(ip);
     const country = geo.country ? countryFlag(geo.country) : null;
 
-    const contextParts = [device, geo.city].filter(Boolean);
-    const userMessage = contextParts.length
-      ? `[${contextParts.join(', ')}] ${displayMessage}`
-      : displayMessage;
+    const contextParts = [`#${rateCheck.userId}`, device, geo.city].filter(Boolean);
+    const userMessage = `[${contextParts.join(', ')}] ${displayMessage}`;
 
     const message = insertMessage({
       type: 'free',

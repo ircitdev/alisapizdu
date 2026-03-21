@@ -134,10 +134,8 @@ router.post('/:code/use', async (req, res) => {
     // Generate varied message text
     const displayMessage = getRandomMessage();
 
-    const contextParts = [device, geo.city].filter(Boolean);
-    const userMessage = contextParts.length
-      ? `[${contextParts.join(', ')}] ${displayMessage}`
-      : displayMessage;
+    const contextParts = [`#${invite.created_by_user_id}`, device, geo.city].filter(Boolean);
+    const userMessage = `[${contextParts.join(', ')}] ${displayMessage}`;
 
     // Create message with type 'invite'
     const message = insertMessage({
