@@ -10,6 +10,7 @@ interface SSEEvents {
   onOnlineCount: (count: number) => void;
   onNameUpdate?: (messageId: number, senderName: string) => void;
   onVoteUpdate?: (messageId: number, up: number, down: number) => void;
+  onReactionsUpdate?: (messageId: number, reactions: Record<string, number>) => void;
 }
 
 const MIN_RETRY_DELAY = 1000;
@@ -73,6 +74,13 @@ export function useSSE(events: SSEEvents) {
       try {
         const data = JSON.parse(e.data);
         eventsRef.current.onVoteUpdate?.(data.id, data.up, data.down);
+      } catch { /* ignore */ }
+    });
+
+    es.addEventListener('message:reactions', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        eventsRef.current.onReactionsUpdate?.(data.id, data.reactions);
       } catch { /* ignore */ }
     });
 

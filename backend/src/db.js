@@ -60,6 +60,16 @@ function getDb() {
 
     CREATE INDEX IF NOT EXISTS idx_votes_message ON votes(message_id);
 
+    CREATE TABLE IF NOT EXISTS reactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message_id INTEGER NOT NULL,
+      ip_hash TEXT NOT NULL,
+      emoji TEXT NOT NULL,
+      UNIQUE(message_id, ip_hash, emoji)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reactions_message ON reactions(message_id);
+
     CREATE TABLE IF NOT EXISTS invite_links (
       id TEXT PRIMARY KEY,
       created_by_ip TEXT,
@@ -311,6 +321,55 @@ function getMessageById(id) {
   return database.prepare('SELECT id, sender_name, user_message, alice_response FROM messages WHERE id = ?').get(id);
 }
 
+// --- Reactions ---
+
+const VALID_EMOJIS = ['😂', '🔥', '💀', '🤡'];
+
+function toggleReaction(messageId, ipHash, emoji) {
+  if (!VALID_EMOJIS.includes(emoji)) return null;
+  const database = getDb();
+  const existing = database.prepare(
+    'SELECT id FROM reactions WHERE message_id = ? AND ip_hash = ? AND emoji = ?'
+  ).get(messageId, ipHash, emoji);
+  if (existing) {
+    database.prepare('DELETE FROM reactions WHERE id = ?').run(existing.id);
+  } else {
+    database.prepare('INSERT OR IGNORE INTO reactions (message_id, ip_hash, emoji) VALUES (?, ?, ?)').run(messageId, ipHash, emoji);
+  }
+  return getReactions(messageId);
+}
+
+function getReactions(messageId) {
+  const database = getDb();
+  const rows = database.prepare(
+    'SELECT emoji, COUNT(*) as c FROM reactions WHERE message_id = ? GROUP BY emoji'
+  ).all(messageId);
+  const result = {};
+  for (const row of rows) result[row.emoji] = row.c;
+  return result;
+}
+
+function getReactionsBatch(messageIds) {
+  if (!messageIds.length) return {};
+  const database = getDb();
+  const placeholders = messageIds.map(() => '?').join(',');
+  const rows = database.prepare(
+    `SELECT message_id, emoji, COUNT(*) as c FROM reactions WHERE message_id IN (${placeholders}) GROUP BY message_id, emoji`
+  ).all(...messageIds);
+  const result = {};
+  for (const row of rows) {
+    if (!result[row.message_id]) result[row.message_id] = {};
+    result[row.message_id][row.emoji] = row.c;
+  }
+  return result;
+}
+
+function getUserReactions(messageId, ipHash) {
+  const database = getDb();
+  const rows = database.prepare('SELECT emoji FROM reactions WHERE message_id = ? AND ip_hash = ?').all(messageId, ipHash);
+  return rows.map(r => r.emoji);
+}
+
 // --- Invite links ---
 
 function createInviteLink({ id, created_by_ip, created_by_user_id, preset_name, allow_rename, notify_email }) {
@@ -356,4 +415,4 @@ function countInviteEmailsToday(email) {
   return row ? row.c : 0;
 }
 
-module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, createInviteLink, getInviteLink, markInviteUsed, updateInviteMessageId, countInvitesByIp, countInviteEmailsToday, close };
+module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, toggleReaction, getReactions, getReactionsBatch, getUserReactions, createInviteLink, getInviteLink, markInviteUsed, updateInviteMessageId, countInvitesByIp, countInviteEmailsToday, close };

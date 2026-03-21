@@ -150,6 +150,14 @@ export function useMessages() {
     );
   }, []);
 
+  const updateReactions = useCallback((messageId: number, reactions: Record<string, number>) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, reactions } : m
+      )
+    );
+  }, []);
+
   // SSE: online count update
   const updateOnlineCount = useCallback((count: number) => {
     setOnlineCount(count);
@@ -168,6 +176,7 @@ export function useMessages() {
     appendToken,
     completeMessage,
     updateVotes,
+    updateReactions,
     updateMessageName,
     vipCount,
     updateOnlineCount,

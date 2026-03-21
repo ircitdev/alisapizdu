@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getMessages, getVotesBatch } = require('../db');
+const { getMessages, getVotesBatch, getReactionsBatch } = require('../db');
 
 router.get('/', (req, res) => {
   try {
@@ -16,10 +16,12 @@ router.get('/', (req, res) => {
     // Attach vote counts
     const ids = result.messages.map(m => m.id);
     const votes = getVotesBatch(ids);
+    const reactions = getReactionsBatch(ids);
     result.messages = result.messages.map(m => ({
       ...m,
       votes_up: votes[m.id]?.up || 0,
       votes_down: votes[m.id]?.down || 0,
+      reactions: reactions[m.id] || {},
     }));
 
     res.json(result);

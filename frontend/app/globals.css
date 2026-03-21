@@ -66,6 +66,19 @@ body {
   background-clip: text;
 }
 
+/* Header shimmer — "покажи" color shift */
+@keyframes headerShimmer {
+  0% { color: rgba(255,255,255,0.6); }
+  25% { color: #7B68EE; }
+  50% { color: #9B59B6; }
+  75% { color: #ffd700; }
+  100% { color: rgba(255,255,255,0.6); }
+}
+
+.header-shimmer {
+  animation: headerShimmer 6s ease-in-out infinite;
+}
+
 /* Glow button */
 .btn-glow {
   background: linear-gradient(135deg, #7B68EE 0%, #9B59B6 100%);

@@ -31,6 +31,7 @@ export interface Message {
   reply_to: number | null;
   votes_up: number;
   votes_down: number;
+  reactions: Record<string, number>;
 }
 
 export interface MessagesResponse {
@@ -119,6 +120,16 @@ export async function createPayment(message: string): Promise<PaymentResponse> {
 
 export function getSSEUrl(): string {
   return `${API_BASE}/messages/stream`;
+}
+
+export async function toggleReaction(
+  messageId: number,
+  emoji: string
+): Promise<{ ok: boolean; reactions: Record<string, number> }> {
+  return apiFetch(`/reaction/${messageId}`, {
+    method: 'POST',
+    body: JSON.stringify({ emoji }),
+  });
 }
 
 export async function voteMessage(

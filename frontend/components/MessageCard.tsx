@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react';
-import { type Message, getMessageShareUrl, updateName, voteMessage } from '@/lib/api';
+import { type Message, getMessageShareUrl, updateName, voteMessage, toggleReaction } from '@/lib/api';
 import { reachGoal } from '@/lib/metrika';
 
 interface MessageCardProps {
@@ -42,6 +42,7 @@ export default function MessageCard({
   const [editName, setEditName] = useState('');
   const [myVote, setMyVote] = useState<0 | 1 | -1>(0);
   const [showShareTip, setShowShareTip] = useState(false);
+  const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isPaid = message.type === 'paid';
@@ -62,10 +63,12 @@ export default function MessageCard({
     return myMsgId ? parseInt(myMsgId, 10) === message.id : false;
   }, [message.id]);
 
-  // Load saved vote
+  // Load saved vote & reactions
   useEffect(() => {
     const saved = localStorage.getItem(`vote_${message.id}`);
     if (saved) setMyVote(parseInt(saved, 10) as 1 | -1);
+    const savedR = localStorage.getItem(`reactions_${message.id}`);
+    if (savedR) try { setMyReactions(new Set(JSON.parse(savedR))); } catch {}
   }, [message.id]);
 
   const [showNameTip, setShowNameTip] = useState(false);
@@ -127,6 +130,14 @@ export default function MessageCard({
     reachGoal(vote === 1 ? 'vote_up' : 'vote_down');
     try { await voteMessage(message.id, vote); } catch {}
   }, [myVote, message.id]);
+
+  const handleReaction = useCallback(async (emoji: string) => {
+    const next = new Set(myReactions);
+    if (next.has(emoji)) next.delete(emoji); else next.add(emoji);
+    setMyReactions(next);
+    localStorage.setItem(`reactions_${message.id}`, JSON.stringify(Array.from(next)));
+    try { await toggleReaction(message.id, emoji); } catch {}
+  }, [myReactions, message.id]);
 
   const handleShare = useCallback(async () => {
     reachGoal('share_click');
@@ -338,6 +349,23 @@ export default function MessageCard({
                 <span className="text-[11px] font-medium">{message.votes_down}</span>
               )}
             </button>
+            {/* Reactions */}
+            {['😂', '🔥', '💀', '🤡'].map(emoji => {
+              const count = message.reactions?.[emoji] || 0;
+              const active = myReactions.has(emoji);
+              return (
+                <button
+                  key={emoji}
+                  onClick={() => handleReaction(emoji)}
+                  className={`flex items-center gap-0.5 text-sm transition-all duration-200 px-1 py-0.5 rounded ${
+                    active ? 'bg-white/10 scale-110' : 'hover:bg-white/5 opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  <span>{emoji}</span>
+                  {count > 0 && <span className="text-[10px] text-white/40">{count}</span>}
+                </button>
+              );
+            })}
           </div>
 
           {/* Views + Share */}

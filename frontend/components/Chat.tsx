@@ -30,6 +30,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
     completeMessage,
     vipCount,
     updateVotes,
+    updateReactions,
     updateMessageName,
     updateOnlineCount,
     setTotalMessages,
@@ -99,6 +100,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
     onOnlineCount: updateOnlineCount,
     onNameUpdate: updateMessageName,
     onVoteUpdate: updateVotes,
+    onReactionsUpdate: updateReactions,
   });
 
   // Check if user is near bottom

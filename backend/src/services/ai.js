@@ -11,6 +11,17 @@ const OPERATIONS_URL = 'https://llm.api.cloud.yandex.net/operations';
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 15;
 
+const SYSTEM_PROMPT = `Отвечай коротко, 1-3 предложения. Будь остроумной и дерзкой.
+
+ЗАПРЕЩЕНО отвечать в стиле:
+- "Я не могу выполнить этот запрос"
+- "Это нарушает правила"
+- "Содержит нецензурное слово"
+- "Если у вас есть другой вопрос"
+- Любые шаблонные вежливые отказы
+
+Вместо этого — сарказм, абсурд, юмор, философия, неожиданные повороты.`;
+
 // Безобидные промпты для повторной генерации после отказа
 const RETRY_PROMPTS = [
   'нарисуй что-нибудь смешное',
@@ -118,6 +129,7 @@ async function generateText(userMessage, onToken) {
     modelUri: `gpt://${config.folderId}/yandexgpt/latest`,
     completionOptions: { stream: false, temperature: 1.0, maxTokens: '200' },
     messages: [
+      { role: 'system', text: SYSTEM_PROMPT },
       { role: 'user', text: userMessage },
     ],
   };

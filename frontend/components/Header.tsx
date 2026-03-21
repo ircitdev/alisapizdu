@@ -15,7 +15,7 @@ export default function Header({ onlineCount, totalMessages, vipCount, onDonateC
           <h1 className="text-base sm:text-2xl font-bold tracking-tight whitespace-nowrap shrink-0">
             <span className="text-alice-purple">а</span>
             <span className="text-alice-purple hidden sm:inline">лиса</span>
-            <span className="text-white/60">покажи</span>
+            <span className="header-shimmer">покажи</span>
             <span className="text-white">пизду</span>
             <span className="text-white/30 hidden sm:inline">.рф</span>
           </h1>
