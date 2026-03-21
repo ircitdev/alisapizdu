@@ -7,8 +7,10 @@ import { reachGoal } from '@/lib/metrika';
 interface AskButtonProps {
   onCustomClick: () => void;
   onInviteClick: () => void;
+  onFilterClick: () => void;
   hasAsked: boolean;
   inviteCode?: string;
+  filterActive?: boolean;
 }
 
 type ButtonState = 'idle' | 'thinking' | 'used';
@@ -30,7 +32,7 @@ function formatRemaining(ms: number): string {
   return `${minutes} мин`;
 }
 
-export default function AskButton({ onCustomClick, onInviteClick, hasAsked, inviteCode }: AskButtonProps) {
+export default function AskButton({ onCustomClick, onInviteClick, onFilterClick, hasAsked, inviteCode, filterActive }: AskButtonProps) {
   const [state, setState] = useState<ButtonState>('idle');
   const [remaining, setRemaining] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +139,25 @@ export default function AskButton({ onCustomClick, onInviteClick, hasAsked, invi
 
         {(state === 'used' || hasAsked) && !inviteCode ? (
           <div className="flex gap-2">
+            {/* Filter */}
+            <button
+              onClick={onFilterClick}
+              className={`
+                py-3.5 px-3 rounded-xl border-2 transition-all duration-300 select-none active:scale-[0.98]
+                ${filterActive
+                  ? 'border-alice-purple bg-alice-purple/20 text-alice-purple'
+                  : 'border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'}
+              `}
+              title="Топ ответов"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="7" y1="12" x2="17" y2="12" />
+                <line x1="10" y1="18" x2="14" y2="18" />
+              </svg>
+            </button>
+
+            {/* Custom message */}
             <button
               onClick={onCustomClick}
               className="
@@ -149,17 +170,25 @@ export default function AskButton({ onCustomClick, onInviteClick, hasAsked, invi
             >
               Написать своё &mdash; 1000&thinsp;&#8381;
             </button>
+
+            {/* Invite */}
             <button
               onClick={onInviteClick}
               className="
-                py-3.5 px-4 rounded-xl border-2 border-alice-purple/40
+                py-3.5 px-3 sm:px-4 rounded-xl border-2 border-alice-purple/40
                 text-alice-purple font-semibold text-sm sm:text-base
                 hover:border-alice-purple hover:bg-alice-purple/5
                 transition-all duration-300 select-none
                 active:scale-[0.98] whitespace-nowrap
               "
             >
-              Пригласить
+              <svg className="sm:hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+              <span className="hidden sm:inline">Пригласить</span>
             </button>
           </div>
         ) : (

@@ -42,6 +42,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
   const [newMessageIds, setNewMessageIds] = useState<Set<number>>(new Set());
   const [hasAsked, setHasAsked] = useState(false);
   const [fakeOnline, setFakeOnline] = useState(0);
+  const [filterTop, setFilterTop] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | undefined>(undefined);
 
   // Read invite code from URL params (client-side only)
@@ -213,8 +214,18 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
             </div>
           )}
 
+          {/* Filter label */}
+          {filterTop && messages.length > 0 && (
+            <div className="text-center text-alice-purple/60 text-xs py-1">
+              Топ по голосам
+            </div>
+          )}
+
           {/* Messages */}
-          {messages.map((msg) => {
+          {(filterTop
+            ? [...messages].sort((a, b) => (b.votes_up - b.votes_down) - (a.votes_up - a.votes_down))
+            : messages
+          ).map((msg) => {
             const streaming = streamingState[msg.id];
             const replyMsg = msg.reply_to
               ? messages.find((m) => m.id === msg.reply_to) || null
@@ -237,7 +248,14 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
         </div>
       </div>
 
-      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => { setInviteOpen(true); reachGoal('invite_open'); }} hasAsked={hasAsked} inviteCode={inviteCode} />
+      <AskButton
+        onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }}
+        onInviteClick={() => { setInviteOpen(true); reachGoal('invite_open'); }}
+        onFilterClick={() => setFilterTop(f => !f)}
+        filterActive={filterTop}
+        hasAsked={hasAsked}
+        inviteCode={inviteCode}
+      />
 
       <CustomMessageModal
         isOpen={modalOpen}

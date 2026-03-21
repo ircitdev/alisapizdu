@@ -46,6 +46,13 @@ export default function MessageCard({
 
   const isPaid = message.type === 'paid';
   const isInvite = message.type === 'invite';
+
+  // Fake view count based on message id + votes (deterministic per message)
+  const viewCount = useMemo(() => {
+    const base = message.id * 37 + 142;
+    const votes = (message.votes_up || 0) + (message.votes_down || 0);
+    return base + votes * 12;
+  }, [message.id, message.votes_up, message.votes_down]);
   const senderName = message.sender_name || 'Аноним';
   const displayedResponse = isStreaming ? streamingTokens || '' : message.alice_response;
 
@@ -333,8 +340,16 @@ export default function MessageCard({
             </button>
           </div>
 
-          {/* Share + Invite */}
+          {/* Views + Share */}
           <div className="flex items-center gap-1.5 relative">
+            {/* View count */}
+            <span className="flex items-center gap-1 text-white/15 text-[11px]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {viewCount}
+            </span>
             {showShareTip && (
               <div className="absolute -left-40 -top-1 bg-alice-purple text-white text-xs px-3 py-1.5
                               rounded-lg whitespace-nowrap animate-fade-in shadow-lg z-10">
