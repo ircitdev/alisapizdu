@@ -37,10 +37,10 @@ router.post('/', async (req, res) => {
     const geo = await getGeoByIP(ip);
     const country = geo.country ? countryFlag(geo.country) : null;
 
-    // Build context-enriched message for AI
-    const timezone = req.body.timezone || 'Unknown';
-    const contextParts = [device, os, browser, geo.city, geo.country ? geo.country : null, `UTC tz: ${timezone}`].filter(Boolean);
-    const userMessage = `[Пользователь: ${contextParts.join(', ')}]\n${displayMessage}`;
+    const contextParts = [device, geo.city].filter(Boolean);
+    const userMessage = contextParts.length
+      ? `[${contextParts.join(', ')}] ${displayMessage}`
+      : displayMessage;
 
     const message = insertMessage({
       type: 'free',

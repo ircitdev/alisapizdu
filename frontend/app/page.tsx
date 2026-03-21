@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <main>
       {!loaded && <Preloader onComplete={handleComplete} />}
-      <Chat />
+      <Chat preloaderDone={loaded} />
     </main>
   );
 }

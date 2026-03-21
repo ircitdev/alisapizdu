@@ -37,6 +37,7 @@ export default function MessageCard({
   onInvite,
 }: MessageCardProps) {
   const [copied, setCopied] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [myVote, setMyVote] = useState<0 | 1 | -1>(0);
@@ -266,17 +267,35 @@ export default function MessageCard({
                 {displayedResponse}
               </p>
             )}
-            {(message.has_image || message.alice_image) && (
-              <img
-                src={message.alice_image
-                  ? `data:image/jpeg;base64,${message.alice_image}`
-                  : `/api/image/${message.id}`
-                }
-                alt="Ответ Алисы"
-                className="mt-2 rounded-lg max-w-full max-h-[400px] object-contain border border-white/10"
-                loading="lazy"
-              />
-            )}
+            {(message.has_image || message.alice_image) && (() => {
+              const imgSrc = message.alice_image
+                ? `data:image/jpeg;base64,${message.alice_image}`
+                : `/api/image/${message.id}`;
+              return (
+                <>
+                  <img
+                    src={imgSrc}
+                    alt="Ответ Алисы"
+                    onClick={() => setLightbox(true)}
+                    className="mt-2 rounded-lg w-40 h-40 sm:w-48 sm:h-48 object-cover border border-white/10
+                               cursor-pointer hover:opacity-80 transition-opacity"
+                    loading="lazy"
+                  />
+                  {lightbox && (
+                    <div
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm"
+                      onClick={() => setLightbox(false)}
+                    >
+                      <img
+                        src={imgSrc}
+                        alt="Ответ Алисы"
+                        className="max-w-[90vw] max-h-[85vh] rounded-xl object-contain animate-fade-in"
+                      />
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -350,21 +369,6 @@ export default function MessageCard({
                 </>
               )}
             </button>
-            {onInvite && (
-              <button
-                onClick={onInvite}
-                className="flex items-center gap-1 text-xs transition-all duration-200 px-2 py-1 rounded-lg
-                           text-alice-purple/60 hover:text-alice-purple hover:bg-alice-purple/10"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <line x1="19" y1="8" x2="19" y2="14" />
-                  <line x1="22" y1="11" x2="16" y2="11" />
-                </svg>
-                <span className="hidden sm:inline">Пригласить</span>
-              </button>
-            )}
           </div>
         </div>
       )}

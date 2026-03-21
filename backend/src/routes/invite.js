@@ -134,10 +134,10 @@ router.post('/:code/use', async (req, res) => {
     // Generate varied message text
     const displayMessage = getRandomMessage();
 
-    // Build context for AI
-    const timezone = req.body.timezone || 'Unknown';
-    const contextParts = [device, os, browser, geo.city, geo.country || null, `UTC tz: ${timezone}`, `[Приглашён пользователем #${invite.created_by_user_id}]`].filter(Boolean);
-    const userMessage = `[Пользователь: ${contextParts.join(', ')}]\n${displayMessage}`;
+    const contextParts = [device, geo.city].filter(Boolean);
+    const userMessage = contextParts.length
+      ? `[${contextParts.join(', ')}] ${displayMessage}`
+      : displayMessage;
 
     // Create message with type 'invite'
     const message = insertMessage({

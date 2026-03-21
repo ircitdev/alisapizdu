@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { askAlice } from '@/lib/api';
+import { askAlice, useInvite } from '@/lib/api';
 import { reachGoal } from '@/lib/metrika';
 
 interface AskButtonProps {
   onCustomClick: () => void;
   onInviteClick: () => void;
   hasAsked: boolean;
+  inviteCode?: string;
 }
 
 type ButtonState = 'idle' | 'thinking' | 'used';
@@ -29,16 +30,16 @@ function formatRemaining(ms: number): string {
   return `${minutes} мин`;
 }
 
-export default function AskButton({ onCustomClick, onInviteClick, hasAsked }: AskButtonProps) {
+export default function AskButton({ onCustomClick, onInviteClick, hasAsked, inviteCode }: AskButtonProps) {
   const [state, setState] = useState<ButtonState>('idle');
   const [remaining, setRemaining] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [myMessageId, setMyMessageId] = useState<number | null>(null);
 
-  // Check if already used today
+  // Check if already used today (skip if invite link — user gets a free pass)
   useEffect(() => {
     const timeLeft = getTimeUntilReset();
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && !inviteCode) {
       setState('used');
       setRemaining(formatRemaining(timeLeft));
 
@@ -71,26 +72,41 @@ export default function AskButton({ onCustomClick, onInviteClick, hasAsked }: As
 
     try {
       reachGoal('ask_alice');
-      const result = await askAlice();
+      let result;
+      if (inviteCode) {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        result = await useInvite(inviteCode, undefined, timezone);
+      } else {
+        result = await askAlice();
+      }
       localStorage.setItem(STORAGE_KEY, String(Date.now()));
       localStorage.setItem('alisapizdu_my_msg', String(result.id));
       setMyMessageId(result.id);
       setState('used');
       setRemaining(formatRemaining(24 * 60 * 60 * 1000));
+      // Clear invite param from URL
+      if (inviteCode) {
+        window.history.replaceState({}, '', '/');
+      }
     } catch (err) {
       setState('idle');
       const msg = err instanceof Error ? err.message : 'Ошибка';
-      // If rate limited by server
       if (msg.includes('уже спрашивал') || msg.includes('429')) {
         localStorage.setItem(STORAGE_KEY, String(Date.now()));
         setState('used');
         setRemaining(formatRemaining(24 * 60 * 60 * 1000));
+      } else if (msg.includes('410')) {
+        setError('Ссылка уже использована');
+        setTimeout(() => setError(null), 3000);
+      } else if (msg.includes('403')) {
+        setError('Нельзя использовать свою ссылку');
+        setTimeout(() => setError(null), 3000);
       } else {
         setError(msg);
         setTimeout(() => setError(null), 3000);
       }
     }
-  }, [state]);
+  }, [state, inviteCode]);
 
   const buttonContent = () => {
     switch (state) {
@@ -119,7 +135,7 @@ export default function AskButton({ onCustomClick, onInviteClick, hasAsked }: As
           </div>
         )}
 
-        {state === 'used' || hasAsked ? (
+        {(state === 'used' || hasAsked) && !inviteCode ? (
           <div className="flex gap-2">
             <button
               onClick={onCustomClick}

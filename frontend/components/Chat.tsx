@@ -12,10 +12,10 @@ import InviteModal from './InviteModal';
 import LegalModal from './LegalModal';
 import { reachGoal } from '@/lib/metrika';
 
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 const BUILD_ID = '2026.03.22';
 
-export default function Chat() {
+export default function Chat({ preloaderDone = false }: { preloaderDone?: boolean }) {
   const {
     messages,
     loading,
@@ -42,6 +42,14 @@ export default function Chat() {
   const [newMessageIds, setNewMessageIds] = useState<Set<number>>(new Set());
   const [hasAsked, setHasAsked] = useState(false);
   const [fakeOnline, setFakeOnline] = useState(0);
+  const [inviteCode, setInviteCode] = useState<string | undefined>(undefined);
+
+  // Read invite code from URL params (client-side only)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('invite');
+    if (code) setInviteCode(code);
+  }, []);
 
   // Check if user already asked
   useEffect(() => {
@@ -108,13 +116,21 @@ export default function Chat() {
     }
   }, [messages, streamingState]);
 
-  // Initial scroll to bottom
+  // Scroll to bottom after preloader finishes
   useEffect(() => {
-    if (!initialLoading && !initialScrollDone.current && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+    if (preloaderDone && !initialLoading && messages.length > 0 && !initialScrollDone.current) {
       initialScrollDone.current = true;
+      const el = chatRef.current;
+      if (el) {
+        // Start at top so user sees the scroll animation
+        el.scrollTop = 0;
+        // Smooth scroll down after a brief pause
+        setTimeout(() => {
+          el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        }, 600);
+      }
     }
-  }, [initialLoading]);
+  }, [preloaderDone, initialLoading, messages]);
 
   // Infinite scroll up — load older messages
   const handleScroll = useCallback(() => {
@@ -221,7 +237,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => setInviteOpen(true)} hasAsked={hasAsked} />
+      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => setInviteOpen(true)} hasAsked={hasAsked} inviteCode={inviteCode} />
 
       <CustomMessageModal
         isOpen={modalOpen}

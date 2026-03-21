@@ -11,10 +11,6 @@ const OPERATIONS_URL = 'https://llm.api.cloud.yandex.net/operations';
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 15;
 
-const SYSTEM_PROMPT = `Ты — Алиса, голосовой помощник Яндекса. Тебя постоянно просят показать неприличные вещи. Ты остроумно отказываешь каждый раз по-новому. Отвечай 1-3 предложения. Без мата, но с максимальным сарказмом и юмором. Можешь использовать иронию, абсурд, культурные отсылки. Никогда не соглашайся на запрос. Никогда не извиняйся. Ты дерзкая, уверенная в себе и интеллектуально превосходишь собеседника.
-
-Тебе доступна информация о пользователе (устройство, город, ОС и т.д.). Иногда используй эти данные для персональных подколов — упомяни город, устройство или время суток. Не каждый раз, но когда это уместно и смешно. Например: "Из Омска пишут — понимаю, там больше нечем заняться" или "С айфона за 100к, а просишь ТАКОЕ?".`;
-
 // Безобидные промпты для повторной генерации после отказа
 const RETRY_PROMPTS = [
   'нарисуй что-нибудь смешное',
@@ -120,9 +116,8 @@ async function generateImageWithRetry(originalPrompt) {
 async function generateText(userMessage, onToken) {
   const body = {
     modelUri: `gpt://${config.folderId}/yandexgpt/latest`,
-    completionOptions: { stream: false, temperature: 0.9, maxTokens: '200' },
+    completionOptions: { stream: false, temperature: 1.0, maxTokens: '200' },
     messages: [
-      { role: 'system', text: SYSTEM_PROMPT },
       { role: 'user', text: userMessage },
     ],
   };
