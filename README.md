@@ -475,4 +475,22 @@ server {
 
 Yandex Metrika (ID: 108182887) с webvisor и clickmap.
 
-Цели: `ask_alice`, `custom_open`, `name_edit`, `vote_up`, `vote_down`, `share_click`, `invite_create`, `donate_open`, `donate_click`.
+Цели:
+
+| Цель | Описание |
+|------|----------|
+| `ask_alice` | Нажал "Спросить Алису" |
+| `custom_open` | Открыл "Написать своё" |
+| `custom_send` | Отправил платное сообщение |
+| `share_click` | Нажал "Поделиться" |
+| `vote_up` | Поставил 👍 |
+| `vote_down` | Поставил 👎 |
+| `name_edit` | Изменил имя |
+| `donate_open` | Открыл модалку доната |
+| `donate_click` | Нажал "Выделить грант" |
+| `invite_open` | Открыл модалку "Пригласить" |
+| `invite_create` | Создал invite-ссылку |
+| `invite_copy` | Скопировал invite-ссылку |
+| `invite_telegram` | Отправил invite в Telegram |
+| `invite_use` | Использовал invite-ссылку |
+| `image_lightbox` | Открыл картинку в лайтбоксе |

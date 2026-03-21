@@ -237,7 +237,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
         </div>
       </div>
 
-      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => setInviteOpen(true)} hasAsked={hasAsked} inviteCode={inviteCode} />
+      <AskButton onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }} onInviteClick={() => { setInviteOpen(true); reachGoal('invite_open'); }} hasAsked={hasAsked} inviteCode={inviteCode} />
 
       <CustomMessageModal
         isOpen={modalOpen}

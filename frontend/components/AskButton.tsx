@@ -71,7 +71,7 @@ export default function AskButton({ onCustomClick, onInviteClick, hasAsked, invi
     setError(null);
 
     try {
-      reachGoal('ask_alice');
+      reachGoal(inviteCode ? 'invite_use' : 'ask_alice');
       let result;
       if (inviteCode) {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';

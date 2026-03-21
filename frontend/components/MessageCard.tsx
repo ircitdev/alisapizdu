@@ -276,7 +276,7 @@ export default function MessageCard({
                   <img
                     src={imgSrc}
                     alt="Ответ Алисы"
-                    onClick={() => setLightbox(true)}
+                    onClick={() => { setLightbox(true); reachGoal('image_lightbox'); }}
                     className="mt-2 rounded-lg w-40 h-40 sm:w-48 sm:h-48 object-cover border border-white/10
                                cursor-pointer hover:opacity-80 transition-opacity"
                     loading="lazy"

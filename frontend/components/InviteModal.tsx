@@ -69,6 +69,7 @@ export default function InviteModal({ isOpen, onClose, messageId }: InviteModalP
 
   const handleCopy = useCallback(async () => {
     if (!shareText) return;
+    reachGoal('invite_copy');
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
@@ -87,6 +88,7 @@ export default function InviteModal({ isOpen, onClose, messageId }: InviteModalP
 
   const handleTelegram = useCallback(() => {
     if (!fullUrl) return;
+    reachGoal('invite_telegram');
     window.open(`https://t.me/share/url?url=${encodeURIComponent(fullUrl)}&text=${encodeURIComponent(inviteText)}`, '_blank');
   }, [fullUrl, inviteText]);
 
