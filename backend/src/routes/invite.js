@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { nanoid } = require('nanoid');
 const { hashIP } = require('../utils/hash');
-const { createInviteLink, getInviteLink, markInviteUsed, countInvitesByIp, countInviteEmailsToday, insertMessage, updateAliceResponse } = require('../db');
+const { getUserId } = require('../services/rateLimit');
+const { createInviteLink, getInviteLink, markInviteUsed, updateInviteMessageId, countInvitesByIp, countInviteEmailsToday, insertMessage, updateAliceResponse } = require('../db');
 const { generateResponse } = require('../services/ai');
 const { broadcastNewMessage, broadcastToken, broadcastComplete } = require('../services/broadcast');
 const { sendInviteNotification } = require('../services/email');
@@ -48,7 +49,7 @@ router.post('/', (req, res) => {
     const invite = createInviteLink({
       id: code,
       created_by_ip: ipHash,
-      created_by_user_id: req.body.user_id || null,
+      created_by_user_id: getUserId(req) || null,
       preset_name: name,
       allow_rename: !!allow_rename,
       notify_email: notify_email || null,
@@ -107,10 +108,16 @@ router.post('/:code/use', async (req, res) => {
       return res.status(403).json({ error: 'Нельзя использовать свою же ссылку' });
     }
 
+    // Atomically claim the invite (prevents race condition)
+    const claimed = markInviteUsed(invite.id, 0, ipHash);
+    if (!claimed) {
+      return res.status(410).json({ error: 'Ссылка уже использована' });
+    }
+
     // Determine sender name
     let senderName;
     if (invite.allow_rename && req.body.name && typeof req.body.name === 'string' && req.body.name.trim()) {
-      senderName = req.body.name.trim().slice(0, 30);
+      senderName = req.body.name.trim().replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, '').slice(0, 30);
     } else {
       senderName = invite.preset_name;
     }
@@ -150,8 +157,8 @@ router.post('/:code/use', async (req, res) => {
 
     const messageId = Number(message.id);
 
-    // Mark invite as used
-    markInviteUsed(invite.id, messageId, ipHash);
+    // Update invite with actual message ID
+    updateInviteMessageId(invite.id, messageId);
 
     console.log(`[${new Date().toISOString()}] Invite #${invite.id} used → msg #${messageId} by "${senderName}"`);
 

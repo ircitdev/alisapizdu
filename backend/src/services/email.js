@@ -82,7 +82,9 @@ async function sendInviteNotification({ to, presetName, senderName, device, os, 
       subject: `Ваша ссылка сработала! ${presetName} спросил Алису`,
       html,
     });
-    console.log(`[${new Date().toISOString()}] Email sent to ${to.slice(0, 3)}***`);
+    const [local, domain] = to.split('@');
+    const masked = local[0] + '***@' + domain;
+    console.log(`[${new Date().toISOString()}] Email sent to ${masked}`);
   } catch (err) {
     console.error(`[${new Date().toISOString()}] Email error: ${err.message}`);
   }

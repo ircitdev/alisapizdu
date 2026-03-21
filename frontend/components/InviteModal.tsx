@@ -41,15 +41,10 @@ export default function InviteModal({ isOpen, onClose, messageId }: InviteModalP
     setLoading(true);
 
     try {
-      const userId = localStorage.getItem('alisapizdu_my_msg')
-        ? parseInt(localStorage.getItem('alisapizdu_my_msg')!, 10)
-        : null;
-
       const res = await createInvite(
         name.trim(),
         allowRename,
         email.trim() || undefined,
-        userId
       );
       setResult({ code: res.code, url: res.url });
       setInviteText(getInviteMessage(name.trim()));

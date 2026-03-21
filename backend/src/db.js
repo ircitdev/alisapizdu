@@ -330,8 +330,15 @@ function getInviteLink(code) {
 
 function markInviteUsed(code, messageId, usedByIp) {
   const database = getDb();
-  database.prepare('UPDATE invite_links SET message_id = ?, used_at = ?, used_by_ip = ? WHERE id = ?')
-    .run(messageId, new Date().toISOString(), usedByIp, code);
+  const result = database.prepare(
+    'UPDATE invite_links SET message_id = ?, used_at = ?, used_by_ip = ? WHERE id = ? AND used_at IS NULL'
+  ).run(messageId, new Date().toISOString(), usedByIp, code);
+  return result.changes > 0;
+}
+
+function updateInviteMessageId(code, messageId) {
+  const database = getDb();
+  database.prepare('UPDATE invite_links SET message_id = ? WHERE id = ?').run(messageId, code);
 }
 
 function countInvitesByIp(ipHash) {
@@ -342,12 +349,11 @@ function countInvitesByIp(ipHash) {
 
 function countInviteEmailsToday(email) {
   const database = getDb();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayUTC = new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z';
   const row = database.prepare(
     "SELECT COUNT(*) as c FROM invite_links WHERE notify_email = ? AND used_at IS NOT NULL AND used_at > ?"
-  ).get(email, today.toISOString());
+  ).get(email, todayUTC);
   return row ? row.c : 0;
 }
 
-module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, createInviteLink, getInviteLink, markInviteUsed, countInvitesByIp, countInviteEmailsToday, close };
+module.exports = { getDb, getMessages, insertMessage, updateAliceResponse, updateSenderName, getTotalMessages, getVipCount, voteMessage, getVotes, getVotesBatch, getUserVote, getMessageImage, getLastMessageId, getMessageById, createInviteLink, getInviteLink, markInviteUsed, updateInviteMessageId, countInvitesByIp, countInviteEmailsToday, close };

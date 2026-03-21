@@ -149,7 +149,6 @@ export async function createInvite(
   presetName: string,
   allowRename: boolean,
   notifyEmail?: string,
-  userId?: number | null
 ): Promise<InviteResponse> {
   return apiFetch<InviteResponse>('/invite', {
     method: 'POST',
@@ -157,7 +156,6 @@ export async function createInvite(
       preset_name: presetName,
       allow_rename: allowRename,
       notify_email: notifyEmail || undefined,
-      user_id: userId || undefined,
     }),
   });
 }
