@@ -43,6 +43,7 @@ export default function MessageCard({
   const [myVote, setMyVote] = useState<0 | 1 | -1>(0);
   const [showShareTip, setShowShareTip] = useState(false);
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set());
+  const [showReactions, setShowReactions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isPaid = message.type === 'paid';
@@ -349,6 +350,13 @@ export default function MessageCard({
                 <span className="text-[11px] font-medium">{message.votes_down}</span>
               )}
             </button>
+            {/* Reactions toggle (mobile) */}
+            <button
+              onClick={() => setShowReactions(r => !r)}
+              className="sm:hidden text-white/20 hover:text-white/40 transition-colors px-1"
+            >
+              <span className="text-sm">{showReactions ? '✕' : '+'}</span>
+            </button>
             {/* Reactions */}
             {['😂', '🔥', '💀', '🤡'].map(emoji => {
               const count = message.reactions?.[emoji] || 0;
@@ -357,7 +365,7 @@ export default function MessageCard({
                 <button
                   key={emoji}
                   onClick={() => handleReaction(emoji)}
-                  className={`flex items-center gap-0.5 text-sm transition-all duration-200 px-1 py-0.5 rounded ${
+                  className={`${showReactions ? 'flex' : 'hidden sm:flex'} items-center gap-0.5 text-sm transition-all duration-200 px-1 py-0.5 rounded ${
                     active ? 'bg-white/10 scale-110' : 'hover:bg-white/5 opacity-60 hover:opacity-100'
                   }`}
                 >
@@ -399,7 +407,7 @@ export default function MessageCard({
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
-                  <span>Скопировано</span>
+                  <span className="hidden sm:inline">Скопировано</span>
                 </>
               ) : (
                 <>
@@ -408,7 +416,7 @@ export default function MessageCard({
                     <polyline points="16 6 12 2 8 6" />
                     <line x1="12" y1="2" x2="12" y2="15" />
                   </svg>
-                  <span>Поделиться</span>
+                  <span className="hidden sm:inline">Поделиться</span>
                 </>
               )}
             </button>

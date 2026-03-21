@@ -4,13 +4,15 @@ import { useState, useCallback, useEffect } from 'react';
 import { askAlice, useInvite } from '@/lib/api';
 import { reachGoal } from '@/lib/metrika';
 
+type FilterMode = 'none' | 'top' | 'new' | 'vip';
+
 interface AskButtonProps {
   onCustomClick: () => void;
   onInviteClick: () => void;
-  onFilterClick: () => void;
+  onFilterChange: (mode: FilterMode) => void;
   hasAsked: boolean;
   inviteCode?: string;
-  filterActive?: boolean;
+  filterMode?: FilterMode;
 }
 
 type ButtonState = 'idle' | 'thinking' | 'used';
@@ -32,8 +34,9 @@ function formatRemaining(ms: number): string {
   return `${minutes} мин`;
 }
 
-export default function AskButton({ onCustomClick, onInviteClick, onFilterClick, hasAsked, inviteCode, filterActive }: AskButtonProps) {
+export default function AskButton({ onCustomClick, onInviteClick, onFilterChange, hasAsked, inviteCode, filterMode = 'none' }: AskButtonProps) {
   const [state, setState] = useState<ButtonState>('idle');
+  const [filterOpen, setFilterOpen] = useState(false);
   const [remaining, setRemaining] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [myMessageId, setMyMessageId] = useState<number | null>(null);
@@ -138,23 +141,55 @@ export default function AskButton({ onCustomClick, onInviteClick, onFilterClick,
         )}
 
         {(state === 'used' || hasAsked) && !inviteCode ? (
-          <div className="flex gap-2">
-            {/* Filter */}
+          <div className="flex flex-col gap-2">
+            {/* Filter panel */}
+            {filterOpen && (
+              <div className="flex gap-1.5 justify-center animate-fade-in">
+                {([
+                  { mode: 'top' as FilterMode, icon: '🔝', label: 'Топ' },
+                  { mode: 'new' as FilterMode, icon: '🆕', label: 'Новые' },
+                  { mode: 'vip' as FilterMode, icon: '👑', label: 'VIP' },
+                ]).map(({ mode, icon, label }) => (
+                  <button
+                    key={mode}
+                    onClick={() => { onFilterChange(filterMode === mode ? 'none' : mode); }}
+                    className={`
+                      flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                      ${filterMode === mode
+                        ? 'bg-alice-purple/20 text-alice-purple border border-alice-purple/40'
+                        : 'bg-white/5 text-white/40 border border-white/10 hover:text-white/60'}
+                    `}
+                  >
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+            {/* Filter toggle */}
             <button
-              onClick={onFilterClick}
+              onClick={() => setFilterOpen(o => !o)}
               className={`
                 py-3.5 px-3 rounded-xl border-2 transition-all duration-300 select-none active:scale-[0.98]
-                ${filterActive
+                ${filterOpen
                   ? 'border-alice-purple bg-alice-purple/20 text-alice-purple'
                   : 'border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'}
               `}
-              title="Топ ответов"
+              title="Фильтры"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" y1="6" x2="20" y2="6" />
-                <line x1="7" y1="12" x2="17" y2="12" />
-                <line x1="10" y1="18" x2="14" y2="18" />
-              </svg>
+              {filterOpen ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <line x1="7" y1="12" x2="17" y2="12" />
+                  <line x1="10" y1="18" x2="14" y2="18" />
+                </svg>
+              )}
             </button>
 
             {/* Custom message */}
@@ -190,6 +225,7 @@ export default function AskButton({ onCustomClick, onInviteClick, onFilterClick,
               </svg>
               <span className="hidden sm:inline">Пригласить</span>
             </button>
+          </div>
           </div>
         ) : (
           <button

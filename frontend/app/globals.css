@@ -79,21 +79,34 @@ body {
   animation: headerShimmer 6s ease-in-out infinite;
 }
 
-/* Glow button */
+/* Glow button with breathing pulse */
+@keyframes btnPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(123, 104, 238, 0.4), 0 0 60px rgba(123, 104, 238, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(123, 104, 238, 0.7), 0 0 80px rgba(155, 89, 182, 0.25);
+    transform: scale(1.015);
+  }
+}
+
 .btn-glow {
   background: linear-gradient(135deg, #7B68EE 0%, #9B59B6 100%);
   box-shadow: 0 0 20px rgba(123, 104, 238, 0.4);
-  transition: all 0.3s ease;
+  animation: btnPulse 2.5s ease-in-out infinite;
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 40px rgba(123, 104, 238, 0.7);
-  transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(123, 104, 238, 0.8), 0 0 100px rgba(155, 89, 182, 0.3);
+  transform: scale(1.02);
+  animation: none;
 }
 
 .btn-glow:active {
-  transform: translateY(0);
+  transform: scale(0.98);
   box-shadow: 0 0 15px rgba(123, 104, 238, 0.3);
+  animation: none;
 }
 
 /* Own message gold border */

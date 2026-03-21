@@ -43,7 +43,7 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
   const [newMessageIds, setNewMessageIds] = useState<Set<number>>(new Set());
   const [hasAsked, setHasAsked] = useState(false);
   const [fakeOnline, setFakeOnline] = useState(0);
-  const [filterTop, setFilterTop] = useState(false);
+  const [filterMode, setFilterMode] = useState<'none' | 'top' | 'new' | 'vip'>('none');
   const [inviteCode, setInviteCode] = useState<string | undefined>(undefined);
 
   // Read invite code from URL params (client-side only)
@@ -119,17 +119,27 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
     }
   }, [messages, streamingState]);
 
-  // Scroll to bottom after preloader finishes
+  // Scroll to bottom after preloader finishes (iOS-compatible)
   useEffect(() => {
     if (preloaderDone && !initialLoading && messages.length > 0 && !initialScrollDone.current) {
       initialScrollDone.current = true;
       const el = chatRef.current;
       if (el) {
-        // Start at top so user sees the scroll animation
         el.scrollTop = 0;
-        // Smooth scroll down after a brief pause
+        const scrollEl = el;
         setTimeout(() => {
-          el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+          const target = scrollEl.scrollHeight - scrollEl.clientHeight;
+          const duration = 1200;
+          const start = scrollEl.scrollTop;
+          const startTime = performance.now();
+          const step = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            scrollEl.scrollTop = start + (target - start) * ease;
+            if (progress < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
         }, 600);
       }
     }
@@ -217,17 +227,22 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
           )}
 
           {/* Filter label */}
-          {filterTop && messages.length > 0 && (
+          {filterMode !== 'none' && messages.length > 0 && (
             <div className="text-center text-alice-purple/60 text-xs py-1">
-              Топ по голосам
+              {filterMode === 'top' && 'Топ по голосам'}
+              {filterMode === 'new' && 'Сначала новые'}
+              {filterMode === 'vip' && 'Только VIP'}
             </div>
           )}
 
           {/* Messages */}
-          {(filterTop
-            ? [...messages].sort((a, b) => (b.votes_up - b.votes_down) - (a.votes_up - a.votes_down))
-            : messages
-          ).map((msg) => {
+          {(() => {
+            let sorted = messages;
+            if (filterMode === 'top') sorted = [...messages].sort((a, b) => (b.votes_up - b.votes_down) - (a.votes_up - a.votes_down));
+            else if (filterMode === 'new') sorted = [...messages].sort((a, b) => b.id - a.id);
+            else if (filterMode === 'vip') sorted = messages.filter(m => m.type === 'paid');
+            return sorted;
+          })().map((msg) => {
             const streaming = streamingState[msg.id];
             const replyMsg = msg.reply_to
               ? messages.find((m) => m.id === msg.reply_to) || null
@@ -253,8 +268,8 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
       <AskButton
         onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }}
         onInviteClick={() => { setInviteOpen(true); reachGoal('invite_open'); }}
-        onFilterClick={() => setFilterTop(f => !f)}
-        filterActive={filterTop}
+        onFilterChange={setFilterMode}
+        filterMode={filterMode}
         hasAsked={hasAsked}
         inviteCode={inviteCode}
       />
