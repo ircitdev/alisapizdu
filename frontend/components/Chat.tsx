@@ -297,7 +297,6 @@ export default function Chat({ preloaderDone = false }: { preloaderDone?: boolea
       </div>
 
       <AskButton
-        onCustomClick={() => { setModalOpen(true); reachGoal('custom_open'); }}
         onInviteClick={() => { setInviteOpen(true); reachGoal('invite_open'); }}
         onFilterChange={setFilterMode}
         filterMode={filterMode}

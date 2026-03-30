@@ -51,9 +51,12 @@ export default function MessageCard({
 
   // Fake view count based on message id + votes (deterministic per message)
   const viewCount = useMemo(() => {
-    const base = message.id * 37 + 142;
+    // Deterministic pseudo-random from id
+    const seed = ((message.id * 2654435761) >>> 0) % 1000;
     const votes = (message.votes_up || 0) + (message.votes_down || 0);
-    return base + votes * 12;
+    // Older messages have more views (3-40 base, grows with age)
+    const ageBonus = Math.min(message.id * 2, 200);
+    return Math.max(3, Math.floor(seed % 38 + 3 + ageBonus + votes * 5));
   }, [message.id, message.votes_up, message.votes_down]);
   const senderName = message.sender_name || 'Аноним';
   const displayedResponse = isStreaming ? streamingTokens || '' : message.alice_response;

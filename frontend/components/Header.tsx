@@ -54,7 +54,7 @@ export default function Header({ onlineCount, totalMessages, vipCount, onDonateC
               className="donate-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-sm font-semibold
                          transition-all duration-300 select-none active:scale-95 shrink-0"
             >
-              Донат
+              О проекте
             </button>
           </div>
         </div>
