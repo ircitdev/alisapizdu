@@ -37,8 +37,8 @@ router.post('/', async (req, res) => {
     const geo = await getGeoByIP(ip);
     const country = geo.country ? countryFlag(geo.country) : null;
 
-    // Find last message to reply to
-    const replyToId = getLastMessageId();
+    // Use explicit reply_to from request, or fallback to last message
+    const replyToId = (req.body.reply_to && Number(req.body.reply_to)) || getLastMessageId();
     const replyToMsg = replyToId ? getMessageById(replyToId) : null;
 
     // Build context for AI — include the message being replied to

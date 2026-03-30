@@ -100,13 +100,15 @@ export async function askAlice(): Promise<AskResponse> {
 
 export async function askCustom(
   message: string,
-  senderName?: string
+  senderName?: string,
+  replyTo?: number
 ): Promise<AskResponse> {
   return apiFetch<AskResponse>('/ask-custom', {
     method: 'POST',
     body: JSON.stringify({
       message,
       sender_name: senderName || null,
+      reply_to: replyTo || null,
     }),
   });
 }
