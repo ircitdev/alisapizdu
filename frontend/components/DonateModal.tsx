@@ -30,7 +30,7 @@ export default function DonateModal({ isOpen, onClose }: DonateModalProps) {
   const [teamOpen, setTeamOpen] = useState(false);
 
   useEffect(() => {
-    if (isOpen) reachGoal('donate_open');
+    if (isOpen) reachGoal('about_open');
   }, [isOpen]);
 
   if (!isOpen) return null;

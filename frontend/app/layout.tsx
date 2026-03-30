@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ru_RU',
     siteName: 'AI Research',
-    images: [{ url: '/ogimage.jpg', width: 1280, height: 720 }],
+    images: [{ url: '/api/ogimage', width: 1280, height: 720 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Экспериментальная платформа изучения поведения нейросетей',
     description: 'Открытое исследование в области взаимодействия человека с ИИ. Присоединяйтесь.',
-    images: ['/ogimage.jpg'],
+    images: ['/api/ogimage'],
   },
 };
 

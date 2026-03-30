@@ -277,13 +277,15 @@ export default function AskButton({ onInviteClick, onFilterChange, hasAsked, inv
                 <button
                   onClick={() => setShowTimerTip(t => !t)}
                   className="
-                    w-full py-3.5 px-4 rounded-xl border-2 border-white/10
-                    text-white/30 font-semibold text-sm sm:text-base
+                    w-full py-3.5 px-2 sm:px-4 rounded-xl border-2 border-white/10
+                    text-white/30 font-semibold text-xs sm:text-base
                     select-none bg-white/5 cursor-pointer hover:border-white/20
-                    transition-all duration-200
+                    transition-all duration-200 whitespace-nowrap
                   "
                 >
-                  Следующая попытка &middot; {remaining}
+                  <span className="hidden sm:inline">Следующая попытка &middot; </span>
+                  <span className="sm:hidden">⏳ </span>
+                  {remaining}
                 </button>
                 {showTimerTip && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64
