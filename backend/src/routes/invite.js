@@ -39,12 +39,6 @@ router.post('/', (req, res) => {
     const ip = getRealIP(req);
     const ipHash = hashIP(ip);
 
-    // Limit: max 10 invite links per IP
-    const count = countInvitesByIp(ipHash);
-    if (count >= 10) {
-      return res.status(429).json({ error: 'Максимум 10 ссылок-приглашений' });
-    }
-
     const code = nanoid(6);
     const invite = createInviteLink({
       id: code,

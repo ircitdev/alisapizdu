@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -17,31 +17,38 @@ const STEPS = [
   'Почти готово...',
 ];
 
+const BASE = 'https://storage.googleapis.com/uspeshnyy-projects/apokajipizdu';
+const VIDEO_COUNT = 4;
+
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [fading, setFading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Pick random video index once, detect mobile
+  const videoIdx = useRef(Math.floor(Math.random() * VIDEO_COUNT) + 1);
+  const isMobile = useRef(
+    typeof window !== 'undefined' && window.innerWidth < 640
+  );
+
+  const videoSrc = isMobile.current
+    ? `${BASE}/intro${videoIdx.current}_m.MP4`
+    : `${BASE}/intro${videoIdx.current}.MP4`;
 
   useEffect(() => {
-    // Animate progress bar
     const progressInterval = setInterval(() => {
       setProgress((p) => {
         if (p >= 100) return 100;
-        // Slow down near the end
         const increment = p < 70 ? 2 + Math.random() * 3 : 0.5 + Math.random() * 1.5;
         return Math.min(p + increment, 100);
       });
     }, 50);
 
-    // Cycle through steps
     const stepInterval = setInterval(() => {
-      setCurrentStep((s) => {
-        if (s >= STEPS.length - 1) return s;
-        return s + 1;
-      });
+      setCurrentStep((s) => (s >= STEPS.length - 1 ? s : s + 1));
     }, 400);
 
-    // Complete after ~3.5 seconds
     const completeTimer = setTimeout(() => {
       setProgress(100);
       setCurrentStep(STEPS.length - 1);
@@ -63,7 +70,22 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       className={`fixed inset-0 z-[100] bg-bg-primary flex items-center justify-center
                   transition-opacity duration-500 ${fading ? 'opacity-0' : 'opacity-100'}`}
     >
-      <div className="w-full max-w-md px-6">
+      {/* Background video — desktop only */}
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+      />
+
+      {/* Overlay gradient to darken video */}
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-primary/60 via-transparent to-bg-primary/80 pointer-events-none" />
+
+      {/* Content */}
+      <div className="relative w-full max-w-md px-6">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="relative">
@@ -92,7 +114,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                        rounded-full transition-all duration-100 ease-out"
             style={{ width: `${progress}%` }}
           />
-          {/* Glow effect */}
           <div
             className="absolute top-0 h-full w-20 bg-gradient-to-r from-transparent via-white/20 to-transparent
                        rounded-full blur-sm"

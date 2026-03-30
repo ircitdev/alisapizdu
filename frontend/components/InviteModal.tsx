@@ -25,7 +25,9 @@ interface InviteModalProps {
 export default function InviteModal({ isOpen, onClose, messageId }: InviteModalProps) {
   const [name, setName] = useState('');
   const [allowRename, setAllowRename] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('alisapizdu_invite_email') || '' : ''
+  );
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ code: string; url: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -157,7 +159,12 @@ export default function InviteModal({ isOpen, onClose, messageId }: InviteModalP
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value.slice(0, 100))}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 100);
+                setEmail(val);
+                if (val) localStorage.setItem('alisapizdu_invite_email', val);
+                else localStorage.removeItem('alisapizdu_invite_email');
+              }}
               placeholder="user@example.com"
               className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-3 py-2.5 text-white
                          placeholder:text-white/20 outline-none focus:border-alice-purple/50 transition-colors mb-1"

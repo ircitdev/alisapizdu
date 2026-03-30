@@ -19,6 +19,7 @@ const askCustomRouter = require('./routes/askCustom');
 const imageRouter = require('./routes/image');
 const inviteRouter = require('./routes/invite');
 const reactionRouter = require('./routes/reaction');
+const ogimageRouter = require('./routes/ogimage');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -62,6 +63,7 @@ app.use('/api/ask-custom', askCustomRouter);
 app.use('/api/image', imageRouter);
 app.use('/api/invite', inviteRouter);
 app.use('/api/reaction', reactionRouter);
+app.use('/api/ogimage', ogimageRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
